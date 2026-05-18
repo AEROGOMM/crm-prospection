@@ -1,0 +1,1833 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CRM Prospection — Leads Non Affectables</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #f4f1ec;
+    --surface: #fdfcfa;
+    --surface2: #f0ede6;
+    --border: #ddd9d0;
+    --border-strong: #c4bfb5;
+    --text: #1a1916;
+    --text-muted: #6b665e;
+    --text-hint: #9e9990;
+    --accent: #2d5a3d;
+    --accent-light: #e8f2ec;
+    --accent-mid: #4a8a62;
+    --warn: #8a4a1a;
+    --warn-bg: #fdf0e8;
+    --warn-border: #e8c4a0;
+    --danger: #7a1f1f;
+    --danger-bg: #fdf0f0;
+    --danger-border: #e8a0a0;
+    --info: #1a3d6b;
+    --info-bg: #e8f0fd;
+    --info-border: #a0b8e8;
+    --radius: 8px;
+    --radius-lg: 14px;
+    --shadow: 0 1px 3px rgba(0,0,0,0.06), 0 4px 12px rgba(0,0,0,0.04);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  /* ---- LAYOUT ---- */
+  .app { display: grid; grid-template-columns: 360px 1fr; min-height: 100vh; }
+
+  /* ---- SIDEBAR ---- */
+  .sidebar {
+    background: var(--accent);
+    padding: 2rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 2rem;
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    overflow-y: auto;
+  }
+
+  .sidebar-header { color: #fff; }
+  .sidebar-header .logo {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.4rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-bottom: 0.25rem;
+  }
+  .sidebar-header p { font-size: 0.78rem; opacity: 0.65; font-weight: 300; }
+
+  .sidebar-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+  .stat-card {
+    background: rgba(255,255,255,0.1);
+    border-radius: var(--radius);
+    padding: 0.75rem 1rem;
+    border: 1px solid rgba(255,255,255,0.12);
+  }
+  .stat-card .num { font-size: 1.5rem; font-weight: 600; color: #fff; }
+  .stat-card .lbl { font-size: 0.7rem; opacity: 0.6; color: #fff; margin-top: 2px; }
+
+  .sidebar-nav { display: flex; flex-direction: column; gap: 0.25rem; }
+  .nav-btn {
+    display: flex; align-items: center; gap: 0.6rem;
+    padding: 0.6rem 0.75rem;
+    border-radius: var(--radius);
+    border: none;
+    background: transparent;
+    color: rgba(255,255,255,0.65);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.85rem;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.15s;
+  }
+  .nav-btn:hover, .nav-btn.active {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+  }
+  .nav-btn svg { width: 16px; height: 16px; flex-shrink: 0; opacity: 0.8; }
+
+  /* ---- MAIN ---- */
+  .main { padding: 2rem; overflow-y: auto; }
+
+  .section-title {
+    font-family: 'Syne', sans-serif;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: var(--text);
+  }
+
+  /* ---- FORM CARD ---- */
+  .form-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: 1.75rem;
+    box-shadow: var(--shadow);
+    margin-bottom: 1.5rem;
+  }
+
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem 1.25rem; }
+  .form-grid .full { grid-column: 1 / -1; }
+
+  label {
+    display: block;
+    font-size: 0.78rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    margin-bottom: 0.35rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  input[type="text"], input[type="email"], input[type="tel"], select, textarea {
+    width: 100%;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 0.6rem 0.85rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.9rem;
+    color: var(--text);
+    outline: none;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    appearance: none;
+  }
+  input:focus, select:focus, textarea:focus {
+    border-color: var(--accent-mid);
+    box-shadow: 0 0 0 3px rgba(74,138,98,0.15);
+  }
+
+  select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%236b665e' d='M6 8L1 3h10z'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 0.75rem center; padding-right: 2rem; cursor: pointer; }
+
+  /* ---- PRESTATION CHECKBOXES ---- */
+  .prestation-group { display: flex; gap: 0.75rem; flex-wrap: wrap; }
+  .prest-check {
+    display: flex; align-items: center; gap: 0.5rem;
+    background: var(--bg);
+    border: 1.5px solid var(--border);
+    border-radius: 99px;
+    padding: 0.45rem 0.9rem;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+  }
+  .prest-check:hover { border-color: var(--accent-mid); color: var(--accent); }
+  .prest-check input { display: none; }
+  .prest-check.checked {
+    background: var(--accent-light);
+    border-color: var(--accent-mid);
+    color: var(--accent);
+    font-weight: 500;
+  }
+  .prest-check svg { width: 14px; height: 14px; }
+
+  /* ---- ALERT BOX ---- */
+  .alert {
+    border-radius: var(--radius);
+    padding: 0.9rem 1.1rem;
+    font-size: 0.85rem;
+    display: none;
+    margin-top: 0.75rem;
+    align-items: flex-start;
+    gap: 0.65rem;
+    line-height: 1.5;
+  }
+  .alert.show { display: flex; }
+  .alert svg { width: 18px; height: 18px; flex-shrink: 0; margin-top: 1px; }
+  .alert-warn { background: var(--warn-bg); border: 1px solid var(--warn-border); color: var(--warn); }
+  .alert-danger { background: var(--danger-bg); border: 1px solid var(--danger-border); color: var(--danger); }
+  .alert-info { background: var(--info-bg); border: 1px solid var(--info-border); color: var(--info); }
+
+  /* ---- BUTTONS ---- */
+  .btn-row { display: flex; gap: 0.75rem; justify-content: flex-end; margin-top: 1.25rem; }
+  .btn {
+    padding: 0.65rem 1.4rem;
+    border-radius: var(--radius);
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.88rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all 0.15s;
+  }
+  .btn-ghost { background: transparent; border-color: var(--border-strong); color: var(--text-muted); }
+  .btn-ghost:hover { border-color: var(--accent-mid); color: var(--accent); }
+  .btn-primary { background: var(--accent); color: #fff; }
+  .btn-primary:hover { background: var(--accent-mid); }
+  .btn-primary:active { transform: scale(0.98); }
+
+  /* ---- TABLE ---- */
+  .table-wrap {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+  }
+
+  .table-toolbar {
+    padding: 1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+  .table-toolbar input {
+    max-width: 240px;
+    padding: 0.45rem 0.75rem;
+    font-size: 0.84rem;
+  }
+  .table-toolbar .filter-pills { display: flex; gap: 0.5rem; margin-left: auto; }
+  .pill {
+    padding: 0.35rem 0.75rem;
+    border-radius: 99px;
+    font-size: 0.76rem;
+    font-weight: 500;
+    cursor: pointer;
+    border: 1px solid transparent;
+    transition: all 0.15s;
+    background: var(--surface2);
+    color: var(--text-muted);
+    border-color: var(--border);
+  }
+  .pill.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 0.84rem; }
+  thead tr { background: var(--surface2); }
+  th {
+    padding: 0.75rem 1rem;
+    text-align: left;
+    font-size: 0.72rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-hint);
+    white-space: nowrap;
+    cursor: pointer;
+    user-select: none;
+  }
+  th:hover { color: var(--text-muted); }
+  td {
+    padding: 0.75rem 1rem;
+    border-bottom: 1px solid var(--border);
+    color: var(--text);
+    vertical-align: middle;
+  }
+  tr:last-child td { border-bottom: none; }
+  tr:hover td { background: var(--surface2); }
+
+  .badge {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.2rem 0.6rem;
+    border-radius: 99px;
+    font-size: 0.72rem;
+    font-weight: 600;
+  }
+  .badge-green { background: #e8f5ec; color: #1e6b34; }
+  .badge-amber { background: #fdf3e3; color: #8a5a1a; }
+  .badge-gray  { background: var(--surface2); color: var(--text-muted); border: 1px solid var(--border); }
+  .badge-red   { background: #fdf0f0; color: #7a1f1f; }
+
+  .prest-icons { display: flex; gap: 0.35rem; }
+  .prest-icon {
+    width: 26px; height: 26px;
+    border-radius: 6px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem; font-weight: 600;
+    title: "";
+  }
+  .prest-icon.atelier { background: #e8f0fd; color: #1a3d6b; }
+  .prest-icon.ext { background: #fdf3e3; color: #8a5a1a; }
+
+  .row-actions { display: flex; gap: 0.5rem; }
+  .act-btn {
+    width: 28px; height: 28px;
+    border-radius: 6px;
+    border: 1px solid var(--border);
+    background: transparent;
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    transition: all 0.12s;
+    font-size: 0.75rem;
+  }
+  .act-btn:hover { border-color: var(--accent-mid); color: var(--accent); background: var(--accent-light); }
+  .act-btn svg { width: 13px; height: 13px; }
+
+  /* ---- STATUS BUTTONS ---- */
+  .status-btns { display: flex; flex-direction: column; gap: 0.3rem; min-width: 130px; }
+  .status-btn {
+    display: flex; align-items: center; gap: 0.4rem;
+    padding: 0.35rem 0.7rem;
+    border-radius: 99px;
+    font-size: 0.73rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.13s;
+    background: var(--surface2);
+    color: var(--text-hint);
+    border-color: var(--border);
+    opacity: 0.45;
+  }
+  .status-btn:hover { opacity: 0.8; }
+  .status-btn .dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
+  .status-btn.active { opacity: 1; }
+  .status-btn.s-nouveau.active   { background: var(--surface2); color: var(--text-muted); border-color: var(--border-strong); }
+  .status-btn.s-en-cours.active  { background: #e8f5ec; color: #1e6b34; border-color: #7dc99a; }
+  .status-btn.s-sans-suite.active{ background: #fdf0f0; color: #7a1f1f; border-color: #e08080; }
+  .status-btn.s-nouveau   .dot { background: var(--border-strong); }
+  .status-btn.s-en-cours  .dot { background: #22a355; }
+  .status-btn.s-sans-suite .dot { background: #c13333; }
+
+  /* ---- MODAL ---- */
+  .modal-overlay {
+    display: none;
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.4);
+    z-index: 100;
+    align-items: center;
+    justify-content: center;
+  }
+  .modal-overlay.open { display: flex; }
+  .modal {
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+    padding: 2rem;
+    width: 100%;
+    max-width: 500px;
+    position: relative;
+  }
+  .modal-title { font-family: 'Syne', sans-serif; font-size: 1.1rem; font-weight: 700; margin-bottom: 1.25rem; }
+  .modal-close {
+    position: absolute; top: 1rem; right: 1rem;
+    width: 28px; height: 28px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--text-muted);
+    font-size: 1rem;
+  }
+  .modal-close:hover { background: var(--surface2); }
+
+  /* ---- TABS ---- */
+  .tabs { display: flex; gap: 0; border-bottom: 1px solid var(--border); margin-bottom: 2rem; }
+  .tab {
+    padding: 0.65rem 1.25rem;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--text-muted);
+    background: transparent;
+    border: none;
+    border-bottom: 2px solid transparent;
+    cursor: pointer;
+    transition: all 0.15s;
+    margin-bottom: -1px;
+  }
+  .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .tab:hover:not(.active) { color: var(--text); }
+
+  .tab-content { display: none; }
+  .tab-content.active { display: block; }
+
+  /* ---- CONFLICT LIST IN ALERT ---- */
+  .conflict-list { margin-top: 0.5rem; }
+  .conflict-item {
+    display: flex; align-items: center; gap: 0.5rem;
+    padding: 0.35rem 0;
+    border-top: 1px solid rgba(0,0,0,0.06);
+    font-size: 0.82rem;
+  }
+  .conflict-item:first-child { border-top: none; }
+
+  /* ---- EMPTY STATE ---- */
+  .empty-state {
+    text-align: center;
+    padding: 3rem 1rem;
+    color: var(--text-hint);
+  }
+  .empty-state svg { width: 48px; height: 48px; opacity: 0.3; margin-bottom: 0.75rem; }
+
+  .status-btn.s-gagne.active { background: #fef3c7; color: #92400e; border-color: #f59e0b; }
+  .status-btn.s-gagne .dot { background: #f59e0b; }
+
+  /* Ligne gagnée dans le tableau */
+  tr.row-gagne td { background: #fffbeb !important; }
+  tr.row-gagne:hover td { background: #fef3c7 !important; }
+  .badge-gold { background: #fef3c7; color: #92400e; border: 1px solid #f59e0b; }
+
+  /* ---- FICHES COMMERCIAL ---- */
+  .fiche-item {
+    padding: 0.5rem 0.7rem;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface2);
+    cursor: pointer;
+    font-size: 0.8rem;
+    transition: all 0.12s;
+    line-height: 1.4;
+  }
+  .fiche-item:hover { border-color: var(--accent-mid); background: var(--accent-light); }
+  .fiche-item.active { border-color: var(--accent-mid); background: var(--accent-light); font-weight: 600; color: var(--accent); }
+  .fiche-item .fiche-dpt { font-size: 0.68rem; color: var(--text-hint); margin-top: 2px; }
+  .fiche-item.active .fiche-dpt { color: var(--accent-mid); }
+
+  /* ---- CODE ROUGE ---- */
+  .code-rouge {
+    border-color: #c13333 !important;
+    box-shadow: 0 0 0 3px rgba(193,51,51,0.18) !important;
+  }
+  .leads-orange {
+    border-color: #c2620a !important;
+    box-shadow: 0 0 0 3px rgba(194,98,10,0.15) !important;
+  }
+  .leads-green {
+    border-color: #1e8a3e !important;
+    box-shadow: 0 0 0 3px rgba(30,138,62,0.15) !important;
+  }
+  .code-rouge-label {
+    display: inline-flex; align-items: center; gap: 0.4rem;
+    background: #c13333; color: #fff;
+    font-size: 0.8rem; font-weight: 700;
+    padding: 0.3rem 0.8rem;
+    border-radius: 99px;
+    margin-bottom: 0.4rem;
+    letter-spacing: 0.02em;
+    animation: fadeInLabel 0.2s ease;
+  }
+  @keyframes fadeInLabel { from { opacity:0; transform:translateY(-4px); } to { opacity:1; transform:none; } }
+  .countdown-bar {
+    height: 4px; background: var(--border); border-radius: 99px; margin-top: 0.5rem; overflow: hidden;
+  }
+  .countdown-bar-inner {
+    height: 100%; background: #c13333; border-radius: 99px;
+    transition: width 0.1s linear;
+  }
+
+  /* ---- COMMERCIAUX ---- */
+  .commercial-btns { display: flex; gap: 0.4rem; flex-wrap: wrap; }
+  .com-btn {
+    display: inline-flex; align-items: center; gap: 0.35rem;
+    padding: 0.28rem 0.65rem;
+    border-radius: 99px;
+    font-size: 0.73rem;
+    font-weight: 600;
+    cursor: pointer;
+    border: 1.5px solid transparent;
+    transition: all 0.13s;
+    font-family: 'DM Sans', sans-serif;
+  }
+  .com-btn.david    { background: #eef2ff; color: #3730a3; border-color: #c7d2fe; }
+  .com-btn.arthur   { background: #fdf4ff; color: #7e22ce; border-color: #e9d5ff; }
+  .com-btn.valentin { background: #fff7ed; color: #c2410c; border-color: #fed7aa; }
+  .com-btn.non-affecte { background: var(--surface2); color: var(--text-hint); border-color: var(--border); }
+  .com-btn.active.david    { background: #3730a3; color: #fff; border-color: #3730a3; }
+  .com-btn.active.arthur   { background: #7e22ce; color: #fff; border-color: #7e22ce; }
+  .com-btn.active.valentin { background: #c2410c; color: #fff; border-color: #c2410c; }
+  .com-avatar {
+    width: 22px; height: 22px;
+    border-radius: 50%;
+    display: inline-flex; align-items: center; justify-content: center;
+    font-size: 0.65rem; font-weight: 700;
+    flex-shrink: 0;
+  }
+  .com-avatar.david    { background: #3730a3; color: #fff; }
+  .com-avatar.arthur   { background: #7e22ce; color: #fff; }
+  .com-avatar.valentin { background: #c2410c; color: #fff; }
+  .com-avatar.non-affecte { background: var(--border-strong); color: var(--text-hint); }
+
+  /* sidebar commerciaux */
+  .sidebar-commerciaux { display: flex; flex-direction: column; gap: 0.5rem; }
+  .com-stat {
+    display: flex; align-items: center; gap: 0.6rem;
+    background: rgba(255,255,255,0.08);
+    border-radius: var(--radius);
+    padding: 0.5rem 0.75rem;
+    border: 1px solid rgba(255,255,255,0.1);
+  }
+  .com-stat .com-avatar { width: 28px; height: 28px; font-size: 0.72rem; }
+  .com-stat .com-name { color: #fff; font-size: 0.82rem; font-weight: 500; flex: 1; }
+  .com-stat .com-count { color: rgba(255,255,255,0.55); font-size: 0.78rem; }
+
+  /* ---- TOAST ---- */
+  .toast {
+    position: fixed;
+    bottom: 1.5rem; right: 1.5rem;
+    background: var(--text);
+    color: #fff;
+    padding: 0.75rem 1.25rem;
+    border-radius: var(--radius);
+    font-size: 0.85rem;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.25s;
+    z-index: 999;
+  }
+  .toast.show { transform: translateY(0); opacity: 1; }
+
+  @media (max-width: 900px) {
+    .app { grid-template-columns: 1fr; }
+    .sidebar { position: static; height: auto; }
+    .form-grid { grid-template-columns: 1fr; }
+    .form-grid .full { grid-column: 1; }
+  }
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-header">
+    <div class="logo">CRM Prospection</div>
+    <p>Leads non affectables aux adhérents</p>
+  </div>
+
+  <div class="sidebar-stats">
+    <div class="stat-card">
+      <div class="num" id="stat-total">0</div>
+      <div class="lbl">Entreprises</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="stat-cours">0</div>
+      <div class="lbl">En cours</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="stat-nouveau">0</div>
+      <div class="lbl">Nouveaux</div>
+    </div>
+    <div class="stat-card">
+      <div class="num" id="stat-sans-suite">0</div>
+      <div class="lbl">Sans suite</div>
+    </div>
+    <div class="stat-card" style="border-color:rgba(245,158,11,0.4); background:rgba(245,158,11,0.15);">
+      <div class="num" id="stat-gagne" style="color:#fcd34d;">0</div>
+      <div class="lbl" style="color:rgba(255,255,255,0.7);">🏆 Gagnés</div>
+    </div>
+  </div>
+
+  <nav class="sidebar-nav">
+    <button class="nav-btn active" onclick="switchTab('saisie', this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4"/></svg>
+      Nouvelle saisie
+    </button>
+    <button class="nav-btn" onclick="switchTab('crm', this)">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+      Base CRM
+    </button>
+  </nav>
+
+  <div>
+    <p style="color:rgba(255,255,255,0.55); font-size:0.72rem; text-transform:uppercase; letter-spacing:0.06em; margin-bottom:0.6rem; font-weight:600;">Affectations</p>
+    <div class="sidebar-commerciaux">
+
+      <div class="com-stat">
+        <div class="com-avatar david">DA</div>
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span class="com-name">David</span>
+            <div style="display:flex;align-items:center;gap:0.4rem;">
+              <span id="stat-david-total" style="color:#fff; font-size:0.82rem; font-weight:600;">0</span>
+              <button onclick="openFichesCommercial('david')" style="background:rgba(255,255,255,0.12);border:none;border-radius:5px;padding:2px 7px;cursor:pointer;color:#fff;font-size:0.68rem;font-family:'DM Sans',sans-serif;" title="Voir les fiches">fiches →</button>
+            </div>
+          </div>
+          <div style="display:flex; gap:0.5rem; margin-top:0.25rem; flex-wrap:wrap;">
+            <span id="stat-david-actif" style="font-size:0.7rem; background:rgba(34,163,85,0.25); color:#7de0a8; padding:1px 7px; border-radius:99px;">0 actif</span>
+            <span id="stat-david-inactif" style="font-size:0.7rem; background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.4); padding:1px 7px; border-radius:99px;">0 inactif</span>
+            <span id="stat-david-gagne" style="display:none; font-size:0.7rem; background:rgba(245,158,11,0.25); color:#fcd34d; padding:1px 7px; border-radius:99px; font-weight:700;">0 gagné</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="com-stat">
+        <div class="com-avatar arthur">AR</div>
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span class="com-name">Arthur</span>
+            <div style="display:flex;align-items:center;gap:0.4rem;">
+              <span id="stat-arthur-total" style="color:#fff; font-size:0.82rem; font-weight:600;">0</span>
+              <button onclick="openFichesCommercial('arthur')" style="background:rgba(255,255,255,0.12);border:none;border-radius:5px;padding:2px 7px;cursor:pointer;color:#fff;font-size:0.68rem;font-family:'DM Sans',sans-serif;" title="Voir les fiches">fiches →</button>
+            </div>
+          </div>
+          <div style="display:flex; gap:0.5rem; margin-top:0.25rem; flex-wrap:wrap;">
+            <span id="stat-arthur-actif" style="font-size:0.7rem; background:rgba(34,163,85,0.25); color:#7de0a8; padding:1px 7px; border-radius:99px;">0 actif</span>
+            <span id="stat-arthur-inactif" style="font-size:0.7rem; background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.4); padding:1px 7px; border-radius:99px;">0 inactif</span>
+            <span id="stat-arthur-gagne" style="display:none; font-size:0.7rem; background:rgba(245,158,11,0.25); color:#fcd34d; padding:1px 7px; border-radius:99px; font-weight:700;">0 gagné</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="com-stat">
+        <div class="com-avatar valentin">VA</div>
+        <div style="flex:1; min-width:0;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <span class="com-name">Valentin</span>
+            <div style="display:flex;align-items:center;gap:0.4rem;">
+              <span id="stat-valentin-total" style="color:#fff; font-size:0.82rem; font-weight:600;">0</span>
+              <button onclick="openFichesCommercial('valentin')" style="background:rgba(255,255,255,0.12);border:none;border-radius:5px;padding:2px 7px;cursor:pointer;color:#fff;font-size:0.68rem;font-family:'DM Sans',sans-serif;" title="Voir les fiches">fiches →</button>
+            </div>
+          </div>
+          <div style="display:flex; gap:0.5rem; margin-top:0.25rem; flex-wrap:wrap;">
+            <span id="stat-valentin-actif" style="font-size:0.7rem; background:rgba(34,163,85,0.25); color:#7de0a8; padding:1px 7px; border-radius:99px;">0 actif</span>
+            <span id="stat-valentin-inactif" style="font-size:0.7rem; background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.4); padding:1px 7px; border-radius:99px;">0 inactif</span>
+            <span id="stat-valentin-gagne" style="display:none; font-size:0.7rem; background:rgba(245,158,11,0.25); color:#fcd34d; padding:1px 7px; border-radius:99px; font-weight:700;">0 gagné</span>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div style="margin-top:auto; padding-top:1rem; border-top: 1px solid rgba(255,255,255,0.1);">
+    <p style="color:rgba(255,255,255,0.4); font-size:0.72rem; line-height:1.5;">Les alertes de conflit sont déclenchées automatiquement lors de la saisie du département.</p>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<main class="main">
+
+  <!-- TAB: SAISIE -->
+  <div class="tab-content active" id="tab-saisie">
+    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:1.5rem;">
+      <div class="section-title" style="margin-bottom:0;">Nouvelle entreprise prospectée</div>
+      <button class="btn" onclick="openVerifDpt()" style="background:var(--accent-light); color:var(--accent); border-color:var(--accent-mid); font-size:0.83rem; display:flex; align-items:center; gap:0.4rem;">
+        <svg width="15" height="15" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 0z"/></svg>
+        Vérifier un département
+      </button>
+    </div>
+
+    <div class="form-card">
+      <div class="form-grid">
+
+        <div class="full">
+          <label>Raison sociale *</label>
+          <input type="text" id="f-nom" placeholder="Ex : Dupont & Fils SARL" autocomplete="off">
+        </div>
+
+        <div>
+          <label>Département *</label>
+          <select id="f-dpt" onchange="checkConflict()">
+            <option value="">— Sélectionner —</option>
+          </select>
+        </div>
+
+        <div>
+          <label>Téléphone</label>
+          <input type="tel" id="f-tel" placeholder="06 XX XX XX XX">
+        </div>
+
+        <div class="full">
+          <label>Adresse e-mail</label>
+          <input type="email" id="f-email" placeholder="contact@entreprise.fr">
+        </div>
+
+        <div class="full">
+          <label>Type de prestation *</label>
+          <div class="prestation-group">
+            <div class="prest-check" id="chk-atelier" onclick="selectPrest('atelier')">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-2 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+              Atelier (interne)
+            </div>
+            <div class="prest-check" id="chk-ext" onclick="selectPrest('ext')">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2"/></svg>
+              Prestation extérieure
+            </div>
+            <div class="prest-check" id="chk-les-deux" onclick="selectPrest('les-deux')">
+              <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6A2.25 2.25 0 016 3.75h2.25A2.25 2.25 0 0110.5 6v2.25a2.25 2.25 0 01-2.25 2.25H6a2.25 2.25 0 01-2.25-2.25V6zM3.75 15.75A2.25 2.25 0 016 13.5h2.25a2.25 2.25 0 012.25 2.25V18a2.25 2.25 0 01-2.25 2.25H6A2.25 2.25 0 013.75 18v-2.25zM13.5 6a2.25 2.25 0 012.25-2.25H18A2.25 2.25 0 0120.25 6v2.25A2.25 2.25 0 0118 10.5h-2.25a2.25 2.25 0 01-2.25-2.25V6zM13.5 15.75a2.25 2.25 0 012.25-2.25H18a2.25 2.25 0 012.25 2.25V18A2.25 2.25 0 0118 20.25h-2.25A2.25 2.25 0 0113.5 18v-2.25z"/></svg>
+              Atelier &amp; Extérieure
+            </div>
+          </div>
+        </div>
+
+        <!-- ALERTES CONFLIT -->
+        <div class="full" id="alert-zone"></div>
+
+        <div class="full">
+          <label>Notes / Commentaires</label>
+          <textarea id="f-notes" rows="3" placeholder="Informations complémentaires sur le prospect..." style="resize:vertical;"></textarea>
+        </div>
+
+      </div>
+
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="resetForm()">Effacer</button>
+        <button class="btn btn-primary" onclick="saveEntry()">Enregistrer dans le CRM →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAB: CRM -->
+  <div class="tab-content" id="tab-crm">
+    <div class="section-title">Base CRM — Entreprises prospectées</div>
+
+    <div class="table-wrap">
+      <div class="table-toolbar">
+        <input type="text" placeholder="Rechercher..." id="search-input" oninput="renderTable()">
+        <div class="filter-pills">
+          <button class="pill active" data-filter="tous" onclick="filterTable(this)">Tous</button>
+          <button class="pill" data-filter="nouveau" onclick="filterTable(this)">Nouveaux</button>
+          <button class="pill" data-filter="en-cours" onclick="filterTable(this)">En cours</button>
+          <button class="pill" data-filter="sans-suite" onclick="filterTable(this)">Sans suite</button>
+          <button class="pill" data-filter="gagne" onclick="filterTable(this)" style="background:#fef3c7;color:#92400e;border-color:#f59e0b;">🏆 Gagné</button>
+          <button class="pill" data-filter="non-affecte" onclick="filterTable(this)">Non affectés</button>
+          <button class="pill" data-filter="david" onclick="filterTable(this)" style="background:#eef2ff;color:#3730a3;border-color:#c7d2fe;">David</button>
+          <button class="pill" data-filter="arthur" onclick="filterTable(this)" style="background:#fdf4ff;color:#7e22ce;border-color:#e9d5ff;">Arthur</button>
+          <button class="pill" data-filter="valentin" onclick="filterTable(this)" style="background:#fff7ed;color:#c2410c;border-color:#fed7aa;">Valentin</button>
+        </div>
+      </div>
+
+      <div id="table-container">
+        <div class="empty-state">
+          <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+          <p>Aucune entreprise enregistrée.</p>
+          <p style="margin-top:0.35rem; font-size:0.8rem;">Utilisez le formulaire de saisie pour ajouter des prospects.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</main>
+</div>
+
+<!-- MODAL DETAIL -->
+<div class="modal-overlay" id="modal-detail">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div class="modal-title" id="modal-title"></div>
+    <div id="modal-body"></div>
+    <div class="btn-row" style="margin-top:1.5rem;">
+      <button class="btn btn-ghost" onclick="closeModal()">Fermer</button>
+      <button class="btn btn-primary" id="modal-save-btn">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL FICHES COMMERCIAL -->
+<div class="modal-overlay" id="modal-fiches">
+  <div class="modal" style="max-width:640px; max-height:90vh; display:flex; flex-direction:column;">
+    <button class="modal-close" onclick="closeFichesModal()">×</button>
+    <div class="modal-title" id="fiches-title"></div>
+
+    <div style="display:flex; gap:0.75rem; margin-bottom:1rem; flex-shrink:0;">
+      <div id="fiches-list" style="width:200px; flex-shrink:0; display:flex; flex-direction:column; gap:0.35rem; overflow-y:auto; max-height:60vh; padding-right:0.5rem;"></div>
+      <div style="flex:1; display:flex; flex-direction:column; gap:0.75rem;">
+        <div id="fiche-detail-header" style="display:none;">
+          <div id="fiche-nom" style="font-weight:600; font-size:0.95rem; margin-bottom:0.2rem;"></div>
+          <div id="fiche-meta" style="font-size:0.78rem; color:var(--text-muted);"></div>
+        </div>
+        <div id="fiche-vide" style="text-align:center; padding:2rem 0; color:var(--text-hint); font-size:0.85rem;">
+          ← Sélectionnez une fiche
+        </div>
+        <div id="fiche-notes-zone" style="display:none; flex:1; flex-direction:column; gap:0.5rem;">
+          <div style="display:flex; align-items:center; justify-content:space-between;">
+            <label style="margin:0;">Notes / Commentaires</label>
+            <span id="notes-ligne-count" style="font-size:0.72rem; color:var(--text-hint); font-weight:500;"></span>
+          </div>
+          <textarea id="fiche-notes-input" rows="6" placeholder="Saisissez vos notes, une idée de lead par ligne..." oninput="onNotesInput()" style="resize:vertical; font-size:0.875rem;"></textarea>
+          <div id="test-gratuit-banner" style="display:none; background:#fff3cd; border:1.5px solid #f5c842; border-radius:8px; padding:0.7rem 1rem; font-size:0.82rem; font-weight:700; color:#7a5800; display:none; align-items:center; gap:0.6rem;">
+            <svg width="18" height="18" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.562.562 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z"/></svg>
+            IL EST TEMPS D'ABORDER LE TEST GRATUIT DE 2 MOIS POUR LE RÉSEAU !
+          </div>
+          <div style="display:flex; justify-content:flex-end;">
+            <button class="btn btn-primary" onclick="saveFicheNotes()" style="font-size:0.83rem; padding:0.5rem 1.1rem;">Enregistrer les notes</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- POP-UP VÉRIFICATION DÉPARTEMENT -->
+<div class="modal-overlay" id="modal-verif">
+  <div class="modal" style="max-width:480px;">
+    <button class="modal-close" onclick="closeVerifDpt()">×</button>
+    <div class="modal-title" style="display:flex;align-items:center;gap:0.6rem;">
+      <svg width="20" height="20" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 15.803a7.5 7.5 0 0010.607 0z"/></svg>
+      Vérification préalable du département
+    </div>
+    <p style="font-size:0.83rem; color:var(--text-muted); margin-bottom:1.25rem; line-height:1.6;">Avant tout appel, vérifiez que le département est éligible et que l'entreprise n'est pas déjà enregistrée dans le CRM.</p>
+
+    <div style="display:grid; gap:0.9rem;">
+
+      <div>
+        <label>Département *</label>
+        <select id="v-dpt" onchange="onVerifDptChange()">
+          <option value="">— Sélectionner —</option>
+        </select>
+      </div>
+
+      <div id="v-dpt-status" style="display:none;"></div>
+
+      <div id="v-leads-block" style="display:none;">
+        <label>Leads enregistrés en 2025 sur ce département *</label>
+        <input type="number" id="v-leads" min="0" placeholder="Ex : 57" oninput="onVerifLeadsChange()">
+        <div id="v-leads-hint" style="margin-top:0.4rem; font-size:0.78rem; color:var(--text-hint);">Saisissez le volume de leads 2025 connu pour ce département.</div>
+      </div>
+
+      <div id="v-nom-block" style="display:none;">
+        <label>Nom de l'entreprise à prospecter *</label>
+        <input type="text" id="v-nom" placeholder="Ex : Dupont & Fils SARL" autocomplete="off" oninput="onVerifNomChange()">
+        <div id="v-nom-hint" style="margin-top:0.4rem; font-size:0.78rem; color:var(--text-hint);"></div>
+        <div id="v-doublons" style="margin-top:0.5rem;"></div>
+      </div>
+
+      <div id="v-result-ok" style="display:none; background:var(--accent-light); border:1.5px solid var(--accent-mid); border-radius:var(--radius); padding:0.85rem 1rem; font-size:0.85rem; color:var(--accent);">
+        <strong>✓ Département éligible — entreprise non connue du CRM.</strong><br>
+        <span style="font-size:0.78rem; opacity:0.8;">Vous pouvez remplir le formulaire d'enregistrement.</span>
+      </div>
+
+    </div>
+
+    <div class="btn-row" style="margin-top:1.25rem;">
+      <button class="btn btn-ghost" onclick="closeVerifDpt()">Fermer</button>
+      <button class="btn btn-primary" id="v-btn-continuer" style="display:none;" onclick="verifContinuer()">Continuer vers le formulaire →</button>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ============================================================
+//  AIRTABLE CONFIG
+// ============================================================
+const AT_TOKEN   = 'patwFNxY5k2BtXwNH.84ee2113ea98cc4faeca36d02fa58c74b579ca8ed857ba9e5bd879357a82574b';
+const AT_BASE    = 'appzzraOMhxiV1l60';
+const AT_TABLE   = 'tblOCl2m4OvCBxMJ7';
+const AT_URL     = `https://api.airtable.com/v0/${AT_BASE}/${AT_TABLE}`;
+const AT_HEADERS = { 'Authorization': `Bearer ${AT_TOKEN}`, 'Content-Type': 'application/json' };
+
+// Convertit un enregistrement Airtable → objet local
+function atToLocal(rec) {
+  const f = rec.fields;
+  return {
+    id: rec.id,           // on garde l'ID Airtable comme identifiant
+    nom:         f.nom         || '',
+    dpt:         f.dpt         || '',
+    tel:         f.tel         || '',
+    email:       f.email       || '',
+    prestAtelier:!!f.prestAtelier,
+    prestExt:    !!f.prestExt,
+    statut:      f.statut      || 'nouveau',
+    commercial:  f.commercial  || '',
+    notes:       f.notes       || '',
+    date:        f.date        || '',
+    dateIso:     f.dateIso     || ''
+  };
+}
+
+// Convertit un objet local → champs Airtable
+function localToAt(e) {
+  return {
+    nom:          e.nom,
+    dpt:          e.dpt,
+    tel:          e.tel         || '',
+    email:        e.email       || '',
+    prestAtelier: !!e.prestAtelier,
+    prestExt:     !!e.prestExt,
+    statut:       e.statut      || 'nouveau',
+    commercial:   e.commercial  || '',
+    notes:        e.notes       || '',
+    date:         e.date        || '',
+    dateIso:      e.dateIso     || ''
+  };
+}
+
+// Chargement initial de tous les enregistrements (pagine si > 100)
+async function loadFromAirtable() {
+  showLoader(true);
+  db = [];
+  let offset = null;
+  try {
+    do {
+      const url = AT_URL + '?pageSize=100' + (offset ? `&offset=${offset}` : '');
+      const r = await fetch(url, { headers: AT_HEADERS });
+      if (!r.ok) throw new Error(await r.text());
+      const data = await r.json();
+      db.push(...data.records.map(atToLocal));
+      offset = data.offset || null;
+    } while (offset);
+  } catch(err) {
+    showToast('⚠ Erreur chargement Airtable : ' + err.message);
+  }
+  showLoader(false);
+  updateStats();
+  renderTable();
+}
+
+// Créer un enregistrement
+async function atCreate(entry) {
+  const r = await fetch(AT_URL, {
+    method: 'POST',
+    headers: AT_HEADERS,
+    body: JSON.stringify({ fields: localToAt(entry) })
+  });
+  if (!r.ok) throw new Error(await r.text());
+  const data = await r.json();
+  return data.id; // retourne l'ID Airtable
+}
+
+// Mettre à jour un enregistrement
+async function atUpdate(id, fields) {
+  const r = await fetch(`${AT_URL}/${id}`, {
+    method: 'PATCH',
+    headers: AT_HEADERS,
+    body: JSON.stringify({ fields })
+  });
+  if (!r.ok) throw new Error(await r.text());
+}
+
+// Supprimer un enregistrement
+async function atDelete(id) {
+  const r = await fetch(`${AT_URL}/${id}`, { method: 'DELETE', headers: AT_HEADERS });
+  if (!r.ok) throw new Error(await r.text());
+}
+
+// Loader overlay
+function showLoader(on) {
+  let el = document.getElementById('at-loader');
+  if (!el) {
+    el = document.createElement('div');
+    el.id = 'at-loader';
+    el.style.cssText = 'position:fixed;inset:0;background:rgba(255,255,255,0.7);z-index:9999;display:flex;align-items:center;justify-content:center;font-family:"DM Sans",sans-serif;font-size:0.9rem;color:#2d5a3d;gap:0.6rem;';
+    el.innerHTML = '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="animation:spin 1s linear infinite"><path d="M21 12a9 9 0 11-6.219-8.56"/></svg> Synchronisation Airtable…';
+    document.body.appendChild(el);
+    const style = document.createElement('style');
+    style.textContent = '@keyframes spin{to{transform:rotate(360deg)}}';
+    document.head.appendChild(style);
+  }
+  el.style.display = on ? 'flex' : 'none';
+}
+
+// ============================================================
+//  DATA & STATE
+// ============================================================
+let db = [];
+let currentFilter = 'tous';
+let currentEditId = null;
+let prestAtelier = false;
+let prestExt = false;
+
+const DEPTS = [
+  ["01","Ain"],["02","Aisne"],["03","Allier"],["04","Alpes-de-Haute-Provence"],
+  ["05","Hautes-Alpes"],["06","Alpes-Maritimes"],["07","Ardèche"],["08","Ardennes"],
+  ["09","Ariège"],["10","Aube"],["11","Aude"],["12","Aveyron"],
+  ["13","Bouches-du-Rhône"],["14","Calvados"],["15","Cantal"],["16","Charente"],
+  ["17","Charente-Maritime"],["18","Cher"],["19","Corrèze"],["21","Côte-d'Or"],
+  ["22","Côtes-d'Armor"],["23","Creuse"],["24","Dordogne"],["25","Doubs"],
+  ["26","Drôme"],["27","Eure"],["28","Eure-et-Loir"],["29","Finistère"],
+  ["2A","Corse-du-Sud"],["2B","Haute-Corse"],["30","Gard"],["31","Haute-Garonne"],
+  ["32","Gers"],["33","Gironde"],["34","Hérault"],["35","Ille-et-Vilaine"],
+  ["36","Indre"],["37","Indre-et-Loire"],["38","Isère"],["39","Jura"],
+  ["40","Landes"],["41","Loir-et-Cher"],["42","Loire"],["43","Haute-Loire"],
+  ["44","Loire-Atlantique"],["45","Loiret"],["46","Lot"],["47","Lot-et-Garonne"],
+  ["48","Lozère"],["49","Maine-et-Loire"],["50","Manche"],["51","Marne"],
+  ["52","Haute-Marne"],["53","Mayenne"],["54","Meurthe-et-Moselle"],["55","Meuse"],
+  ["56","Morbihan"],["57","Moselle"],["58","Nièvre"],["59","Nord"],
+  ["60","Oise"],["61","Orne"],["62","Pas-de-Calais"],["63","Puy-de-Dôme"],
+  ["64","Pyrénées-Atlantiques"],["65","Hautes-Pyrénées"],["66","Pyrénées-Orientales"],
+  ["67","Bas-Rhin"],["68","Haut-Rhin"],["69","Rhône"],["70","Haute-Saône"],
+  ["71","Saône-et-Loire"],["72","Sarthe"],["73","Savoie"],["74","Haute-Savoie"],
+  ["75","Paris"],["76","Seine-Maritime"],["77","Seine-et-Marne"],["78","Yvelines"],
+  ["79","Deux-Sèvres"],["80","Somme"],["81","Tarn"],["82","Tarn-et-Garonne"],
+  ["83","Var"],["84","Vaucluse"],["85","Vendée"],["86","Vienne"],
+  ["87","Haute-Vienne"],["88","Vosges"],["89","Yonne"],["90","Territoire de Belfort"],
+  ["91","Essonne"],["92","Hauts-de-Seine"],["93","Seine-Saint-Denis"],["94","Val-de-Marne"],
+  ["95","Val-d'Oise"],["971","Guadeloupe"],["972","Martinique"],["973","Guyane"],
+  ["974","La Réunion"],["976","Mayotte"]
+];
+
+// Fill dept select
+const dptSel = document.getElementById('f-dpt');
+DEPTS.forEach(([code, name]) => {
+  const opt = document.createElement('option');
+  opt.value = code;
+  opt.textContent = `${code} – ${name}`;
+  dptSel.appendChild(opt);
+});
+
+// ============================================================
+//  PRESTATION TOGGLE
+// ============================================================
+function selectPrest(type) {
+  if (type === 'atelier') {
+    prestAtelier = true; prestExt = false;
+  } else if (type === 'ext') {
+    prestAtelier = false; prestExt = true;
+  } else {
+    prestAtelier = true; prestExt = true;
+  }
+  document.getElementById('chk-atelier').classList.toggle('checked', prestAtelier && !prestExt);
+  document.getElementById('chk-ext').classList.toggle('checked', !prestAtelier && prestExt);
+  document.getElementById('chk-les-deux').classList.toggle('checked', prestAtelier && prestExt);
+  checkConflict();
+}
+
+// ============================================================
+//  CONFLICT CHECK
+// ============================================================
+function checkConflict() {
+  const dpt = document.getElementById('f-dpt').value;
+  const zone = document.getElementById('alert-zone');
+  const leadsBlock = document.getElementById('leads-block');
+  zone.innerHTML = '';
+
+  if (!dpt) { leadsBlock.style.display = 'none'; return; }
+
+  const anyInDpt = db.filter(e => e.dpt === dpt);
+  const enCours = anyInDpt.filter(e => e.statut === 'en-cours');
+
+  // Afficher le champ leads uniquement si dpt totalement vierge
+  if (anyInDpt.length === 0) {
+    leadsBlock.style.display = 'block';
+    document.getElementById('f-leads').value = '';
+    document.getElementById('leads-hint').textContent = 'Obligatoire — premier contact sur ce département.';
+    document.getElementById('leads-hint').style.color = 'var(--text-hint)';
+  } else {
+    leadsBlock.style.display = 'none';
+  }
+
+  const enCoursAtelier = enCours.filter(e => e.prestAtelier);
+  const enCoursExt = enCours.filter(e => e.prestExt);
+  let alerts = [];
+
+  if (enCours.length > 0) {
+    let msg = `<strong>${enCours.length} entreprise${enCours.length > 1 ? 's' : ''} déjà en cours de relation</strong> dans ce département.<br>`;
+    const list = enCours.map(e => {
+      const prest = [e.prestAtelier ? '🏭 Atelier' : '', e.prestExt ? '🚗 Ext.' : ''].filter(Boolean).join(', ');
+      return `<div class="conflict-item">· <strong>${e.nom}</strong> — ${prest}</div>`;
+    }).join('');
+    msg += `<div class="conflict-list">${list}</div>`;
+    alerts.push({ type: 'alert-danger', icon: warningIcon(), msg });
+  }
+  if (prestAtelier && enCoursAtelier.length > 0) {
+    const noms = enCoursAtelier.map(e => e.nom).join(', ');
+    alerts.push({ type: 'alert-warn', icon: infoIcon(), msg: `<strong>Prestation Atelier :</strong> ${enCoursAtelier.length} dossier(s) déjà en cours pour ce type dans le ${dpt} — ${noms}.` });
+  }
+  if (prestExt && enCoursExt.length > 0) {
+    const noms = enCoursExt.map(e => e.nom).join(', ');
+    alerts.push({ type: 'alert-warn', icon: infoIcon(), msg: `<strong>Prestation Extérieure :</strong> ${enCoursExt.length} dossier(s) déjà en cours dans le ${dpt} — ${noms}.` });
+  }
+  alerts.forEach(a => {
+    const div = document.createElement('div');
+    div.className = `alert show ${a.type}`;
+    div.innerHTML = a.icon + `<div>${a.msg}</div>`;
+    zone.appendChild(div);
+  });
+  if (enCours.length === 0 && anyInDpt.length === 0) {
+    const div = document.createElement('div');
+    div.className = 'alert show alert-info';
+    div.innerHTML = checkIcon() + '<div>Aucune entreprise connue dans ce département — premier contact !</div>';
+    zone.appendChild(div);
+  }
+}
+
+// Icons
+function warningIcon() {
+  return `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg>`;
+}
+function infoIcon() {
+  return `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11.25 11.25l.041-.02a.75.75 0 011.063.852l-.708 2.836a.75.75 0 001.063.853l.041-.021M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9-3.75h.008v.008H12V8.25z"/></svg>`;
+}
+function checkIcon() {
+  return `<svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>`;
+}
+
+// ============================================================
+//  POP-UP VÉRIFICATION DÉPARTEMENT
+// ============================================================
+let verifLeadsOk = false;
+let verifNomOk = false;
+let verifDptDejaConnu = false;
+let verifDptValue = '';
+let verifLeadsValue = 0;
+let verifNomValue = '';
+
+function openVerifDpt() {
+  // Remplir le select département si vide
+  const sel = document.getElementById('v-dpt');
+  if (sel.options.length <= 1) {
+    DEPTS.forEach(([code, name]) => {
+      const opt = document.createElement('option');
+      opt.value = code; opt.textContent = `${code} – ${name}`;
+      sel.appendChild(opt);
+    });
+  }
+  // Reset
+  sel.value = '';
+  ['v-dpt-status','v-leads-block','v-nom-block','v-result-ok'].forEach(id => {
+    document.getElementById(id).style.display = 'none';
+  });
+  document.getElementById('v-btn-continuer').style.display = 'none';
+  document.getElementById('v-leads').value = '';
+  document.getElementById('v-nom').value = '';
+  verifLeadsOk = false; verifNomOk = false; verifDptDejaConnu = false;
+  document.getElementById('modal-verif').classList.add('open');
+}
+
+function closeVerifDpt() {
+  document.getElementById('modal-verif').classList.remove('open');
+}
+
+function onVerifDptChange() {
+  const dpt = document.getElementById('v-dpt').value;
+  verifDptValue = dpt;
+  verifLeadsOk = false; verifNomOk = false;
+  ['v-leads-block','v-nom-block','v-result-ok'].forEach(id => document.getElementById(id).style.display = 'none');
+  document.getElementById('v-btn-continuer').style.display = 'none';
+  document.getElementById('v-leads').value = '';
+  document.getElementById('v-nom').value = '';
+
+  if (!dpt) { document.getElementById('v-dpt-status').style.display = 'none'; return; }
+
+  const existants = db.filter(e => e.dpt === dpt);
+  const statusEl = document.getElementById('v-dpt-status');
+  statusEl.style.display = 'block';
+
+  if (existants.length > 0) {
+    // Dpt déjà connu — leads pas obligatoire, passer direct au nom
+    verifDptDejaConnu = true;
+    verifLeadsOk = true;
+    const enCours = existants.filter(e => e.statut === 'en-cours').length;
+    statusEl.innerHTML = `<div class="alert show alert-info" style="margin:0;">
+      ${checkIcon()}<div><strong>${existants.length} entreprise(s) déjà connue(s)</strong> dans ce département (${enCours} en cours).<br>
+      <span style="font-size:0.78rem;">Vérification des leads non requise.</span></div></div>`;
+    document.getElementById('v-nom-block').style.display = 'block';
+  } else {
+    // Dpt vierge — leads obligatoire
+    verifDptDejaConnu = false;
+    verifLeadsOk = false;
+    statusEl.innerHTML = `<div class="alert show alert-info" style="margin:0;">${checkIcon()}<div>Premier contact sur ce département — veuillez renseigner le volume de leads 2025.</div></div>`;
+    document.getElementById('v-leads-block').style.display = 'block';
+  }
+  updateVerifState();
+}
+
+function onVerifLeadsChange() {
+  const val = parseInt(document.getElementById('v-leads').value, 10);
+  const hint = document.getElementById('v-leads-hint');
+  const inp = document.getElementById('v-leads');
+  inp.classList.remove('code-rouge', 'leads-orange', 'leads-green');
+  verifLeadsValue = isNaN(val) ? 0 : val;
+
+  if (isNaN(val) || document.getElementById('v-leads').value.trim() === '') {
+    hint.textContent = 'Saisissez le volume de leads 2025 connu pour ce département.';
+    hint.style.color = 'var(--text-hint)';
+    verifLeadsOk = false;
+    document.getElementById('v-nom-block').style.display = 'none';
+  } else if (val <= 40) {
+    hint.innerHTML = '🔴 <strong>Code rouge</strong> — département non éligible (≤ 40 leads). Appel déconseillé.';
+    hint.style.color = '#c13333';
+    inp.classList.add('code-rouge');
+    verifLeadsOk = false;
+    document.getElementById('v-nom-block').style.display = 'none';
+  } else if (val <= 70) {
+    hint.innerHTML = '🟠 <strong>Département valide</strong> — activité modérée (41–70 leads).';
+    hint.style.color = '#c2620a';
+    inp.classList.add('leads-orange');
+    verifLeadsOk = true;
+    document.getElementById('v-nom-block').style.display = 'block';
+  } else {
+    hint.innerHTML = '🟢 <strong>Département valide</strong> — bonne activité (> 70 leads).';
+    hint.style.color = '#1e6b34';
+    inp.classList.add('leads-green');
+    verifLeadsOk = true;
+    document.getElementById('v-nom-block').style.display = 'block';
+  }
+  updateVerifState();
+}
+
+function onVerifNomChange() {
+  const nom = document.getElementById('v-nom').value.trim().toLowerCase();
+  verifNomValue = document.getElementById('v-nom').value.trim();
+  const hint = document.getElementById('v-nom-hint');
+  const doublons = document.getElementById('v-doublons');
+  doublons.innerHTML = '';
+  verifNomOk = false;
+
+  if (!nom) {
+    hint.textContent = ''; hint.style.color = 'var(--text-hint)';
+    updateVerifState(); return;
+  }
+
+  // Recherche exacte et approchante dans tout le CRM
+  const exact = db.filter(e => e.nom.trim().toLowerCase() === nom);
+  const proche = db.filter(e => e.nom.trim().toLowerCase() !== nom && e.nom.trim().toLowerCase().includes(nom.split(' ')[0]));
+
+  if (exact.length > 0) {
+    hint.innerHTML = '🔴 <strong>Entreprise déjà présente dans le CRM</strong> — enregistrement non autorisé.';
+    hint.style.color = '#c13333';
+    const list = exact.map(e => {
+      const statutLbl = {nouveau:'Nouveau','en-cours':'En cours','sans-suite':'Sans suite'}[e.statut];
+      return `<div class="conflict-item" style="font-size:0.8rem;">· <strong>${e.nom}</strong> — Dpt ${e.dpt} — ${statutLbl}</div>`;
+    }).join('');
+    doublons.innerHTML = `<div class="alert show alert-danger" style="margin:0;flex-direction:column;gap:0.3rem;">${warningIcon()}<div><strong>Correspondance exacte :</strong><div class="conflict-list">${list}</div></div></div>`;
+    verifNomOk = false;
+  } else if (proche.length > 0) {
+    hint.innerHTML = '🟠 <strong>Nom similaire détecté</strong> — vérifiez qu\'il ne s\'agit pas du même établissement.';
+    hint.style.color = '#c2620a';
+    const list = proche.map(e => `<div class="conflict-item" style="font-size:0.8rem;">· <strong>${e.nom}</strong> — Dpt ${e.dpt}</div>`).join('');
+    doublons.innerHTML = `<div class="alert show alert-warn" style="margin:0;flex-direction:column;gap:0.3rem;">${infoIcon()}<div><strong>Noms proches :</strong><div class="conflict-list">${list}</div></div></div>`;
+    verifNomOk = true; // Similaire mais pas identique → laisser décider
+  } else {
+    hint.innerHTML = '✓ Entreprise inconnue du CRM — vous pouvez procéder.';
+    hint.style.color = '#1e6b34';
+    verifNomOk = true;
+  }
+  updateVerifState();
+}
+
+function updateVerifState() {
+  const ok = verifLeadsOk && verifNomOk && verifNomValue.length > 0;
+  document.getElementById('v-result-ok').style.display = ok ? 'block' : 'none';
+  document.getElementById('v-btn-continuer').style.display = ok ? 'inline-flex' : 'none';
+}
+
+function verifContinuer() {
+  // Pré-remplir le formulaire avec le dpt et le nom validés
+  const dptSel = document.getElementById('f-dpt');
+  dptSel.value = verifDptValue;
+  document.getElementById('f-nom').value = verifNomValue;
+  checkConflict();
+  closeVerifDpt();
+  showToast('✓ Département validé — complétez le formulaire.');
+}
+
+document.getElementById('modal-verif').addEventListener('click', function(e) {
+  if (e.target === this) closeVerifDpt();
+});
+
+// ============================================================
+//  CHECK LEADS (formulaire principal — conservé pour compatibilité)
+// ============================================================
+function checkLeads() {
+  const inp = document.getElementById('f-leads');
+  const val = parseInt(inp.value, 10);
+  const hint = document.getElementById('leads-hint');
+  inp.classList.remove('code-rouge', 'leads-orange', 'leads-green');
+  if (isNaN(val) || inp.value.trim() === '') {
+    hint.textContent = 'Obligatoire — premier contact sur ce département.';
+    hint.style.color = 'var(--text-hint)';
+    return;
+  }
+  if (val <= 40) {
+    hint.innerHTML = '🔴 <strong>Code rouge</strong> — département non validable (≤ 40 leads).';
+    hint.style.color = '#c13333';
+    inp.classList.add('code-rouge');
+  } else if (val <= 70) {
+    hint.innerHTML = '🟠 <strong>Département valide</strong> — activité modérée (41–70 leads).';
+    hint.style.color = '#c2620a';
+    inp.classList.add('leads-orange');
+  } else {
+    hint.innerHTML = '🟢 <strong>Département valide</strong> — bonne activité (> 70 leads).';
+    hint.style.color = '#1e6b34';
+    inp.classList.add('leads-green');
+  }
+}
+
+// ============================================================
+//  CODE ROUGE — alerte + reset après 4s
+// ============================================================
+function triggerCodeRouge() {
+  const nomInput = document.getElementById('f-nom');
+  const nomWrap = nomInput.parentElement;
+
+  // Injecter le badge au-dessus du champ
+  let badge = document.getElementById('code-rouge-badge');
+  if (!badge) {
+    badge = document.createElement('div');
+    badge.id = 'code-rouge-badge';
+    badge.className = 'code-rouge-label';
+    badge.innerHTML = `<svg width="14" height="14" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z"/></svg> ! Département en code rouge !`;
+    nomWrap.insertBefore(badge, nomInput);
+  }
+
+  // Barre de décompte
+  let bar = document.getElementById('code-rouge-bar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'code-rouge-bar';
+    bar.className = 'countdown-bar';
+    bar.innerHTML = '<div class="countdown-bar-inner" id="code-rouge-bar-inner" style="width:100%"></div>';
+    nomWrap.appendChild(bar);
+  }
+  document.getElementById('code-rouge-bar-inner').style.width = '100%';
+
+  nomInput.classList.add('code-rouge');
+  nomInput.value = '';
+  nomInput.placeholder = '! Département en code rouge — nouveau formulaire dans 4s…';
+  nomInput.disabled = true;
+  document.querySelector('.btn-primary').disabled = true;
+
+  // Décompte animé
+  const start = Date.now();
+  const duration = 4000;
+  const interval = setInterval(() => {
+    const elapsed = Date.now() - start;
+    const pct = Math.max(0, 100 - (elapsed / duration * 100));
+    document.getElementById('code-rouge-bar-inner').style.width = pct + '%';
+    if (elapsed >= duration) { clearInterval(interval); doReset(); }
+  }, 50);
+
+  function doReset() {
+    // Nettoyer les éléments code rouge
+    if (badge) badge.remove();
+    if (bar) bar.remove();
+    nomInput.classList.remove('code-rouge');
+    nomInput.disabled = false;
+    nomInput.placeholder = 'Ex : Dupont & Fils SARL';
+    document.querySelector('.btn-primary').disabled = false;
+    resetForm();
+  }
+}
+
+// ============================================================
+//  SAVE ENTRY
+// ============================================================
+async function saveEntry() {
+  const nom = document.getElementById('f-nom').value.trim();
+  const dpt = document.getElementById('f-dpt').value;
+  const tel = document.getElementById('f-tel').value.trim();
+  const email = document.getElementById('f-email').value.trim();
+  const notes = document.getElementById('f-notes').value.trim();
+
+  if (!nom) { showToast('⚠ Veuillez saisir la raison sociale.'); return; }
+  if (!dpt)  { showToast('⚠ Veuillez sélectionner un département.'); return; }
+  if (!prestAtelier && !prestExt) { showToast('⚠ Veuillez sélectionner au moins un type de prestation.'); return; }
+
+  if (db.some(e => e.nom.trim().toLowerCase() === nom.toLowerCase())) {
+    showToast('⚠ Cette entreprise est déjà enregistrée dans le CRM.');
+    return;
+  }
+
+  const entry = {
+    nom, dpt, tel, email, notes,
+    prestAtelier, prestExt,
+    statut: 'nouveau',
+    commercial: '',
+    date: new Date().toLocaleDateString('fr-FR'),
+    dateIso: new Date().toISOString()
+  };
+
+  try {
+    showLoader(true);
+    const atId = await atCreate(entry);
+    entry.id = atId;
+    db.push(entry);
+    resetForm();
+    switchTab('crm', document.querySelectorAll('.nav-btn')[1]);
+    showToast('✓ Entreprise enregistrée dans le CRM.');
+    renderTable();
+  } catch(err) {
+    showToast('⚠ Erreur Airtable : ' + err.message);
+  } finally {
+    showLoader(false);
+  }
+}
+
+// ============================================================
+//  RESET FORM
+// ============================================================
+function resetForm() {
+  document.getElementById('f-nom').value = '';
+  document.getElementById('f-dpt').value = '';
+  document.getElementById('f-tel').value = '';
+  document.getElementById('f-email').value = '';
+  document.getElementById('f-notes').value = '';
+  prestAtelier = false;
+  prestExt = false;
+  document.getElementById('chk-atelier').classList.remove('checked');
+  document.getElementById('chk-ext').classList.remove('checked');
+  document.getElementById('chk-les-deux').classList.remove('checked');
+  document.getElementById('alert-zone').innerHTML = '';
+}
+
+// ============================================================
+//  RENDER TABLE
+// ============================================================
+function renderTable() {
+  const q = document.getElementById('search-input').value.toLowerCase();
+  let rows = db.filter(e => {
+    const match = !q || e.nom.toLowerCase().includes(q) || e.dpt.includes(q) ||
+      (e.email && e.email.toLowerCase().includes(q));
+    let filterOk = true;
+    if (currentFilter === 'tous') filterOk = true;
+    else if (currentFilter === 'non-affecte') filterOk = !e.commercial;
+    else if (['david','arthur','valentin'].includes(currentFilter)) filterOk = e.commercial === currentFilter;
+    else filterOk = e.statut === currentFilter;
+    return match && filterOk;
+  }).sort((a, b) => b.dateIso.localeCompare(a.dateIso));
+
+  const cont = document.getElementById('table-container');
+
+  if (rows.length === 0) {
+    cont.innerHTML = `<div class="empty-state">
+      <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4"/></svg>
+      <p>Aucun résultat.</p></div>`;
+    return;
+  }
+
+  const thead = `<thead><tr>
+    <th>Entreprise</th>
+    <th>Dpt</th>
+    <th>Prestations</th>
+    <th>Contact</th>
+    <th>Commercial</th>
+    <th>Statut</th>
+    <th>Date</th>
+    <th></th>
+  </tr></thead>`;
+
+  const tbody = rows.map(e => {
+    const prestHtml = [
+      e.prestAtelier ? `<span class="prest-icon atelier" title="Atelier">AT</span>` : '',
+      e.prestExt ? `<span class="prest-icon ext" title="Prestation ext.">EX</span>` : ''
+    ].join('');
+    const contact = [e.tel, e.email].filter(Boolean).join('<br>') || '<span style="color:var(--text-hint)">—</span>';
+
+    const com = e.commercial || '';
+    const comHtml = ['david','arthur','valentin'].map(c => {
+      const initials = {david:'DA', arthur:'AR', valentin:'VA'};
+      const active = com === c ? 'active' : '';
+      return `<button class="com-btn ${c} ${active}" onclick="assignCommercial(${e.id},'${c}')" title="${c.charAt(0).toUpperCase()+c.slice(1)}">${initials[c]}</button>`;
+    }).join('');
+
+    const statuts = [
+      { val: 'nouveau',    lbl: 'Nouveau',    cls: 's-nouveau' },
+      { val: 'en-cours',   lbl: 'En cours',   cls: 's-en-cours' },
+      { val: 'gagne',      lbl: '🏆 Gagné',   cls: 's-gagne' },
+      { val: 'sans-suite', lbl: 'Sans suite', cls: 's-sans-suite' }
+    ];
+    const statutHtml = `<div class="status-btns">${statuts.map(s =>
+      `<button class="status-btn ${s.cls}${e.statut===s.val?' active':''}" onclick="updateStatus(${e.id},'${s.val}')"><span class="dot"></span>${s.lbl}</button>`
+    ).join('')}</div>`;
+
+    const rowClass = e.statut === 'gagne' ? ' class="row-gagne"' : '';
+    const nomDisplay = e.statut === 'gagne'
+      ? `<div style="display:flex;align-items:center;gap:0.4rem;"><strong style="font-size:0.88rem;">${e.nom}</strong><span style="font-size:0.7rem;background:#fef3c7;color:#92400e;border:1px solid #f59e0b;border-radius:99px;padding:1px 7px;font-weight:700;">GAGNÉ</span></div>`
+      : `<strong style="font-size:0.88rem;">${e.nom}</strong>`;
+
+    return `<tr${rowClass}>
+      <td>${nomDisplay}</td>
+      <td><span style="font-weight:600; font-size:0.82rem; color:var(--accent);">${e.dpt}</span></td>
+      <td><div class="prest-icons">${prestHtml}</div></td>
+      <td style="font-size:0.8rem; line-height:1.6;">${contact}</td>
+      <td><div class="commercial-btns">${comHtml}</div></td>
+      <td>${statutHtml}</td>
+      <td style="font-size:0.78rem; color:var(--text-hint);">${e.date}</td>
+      <td>
+        <div class="row-actions">
+          <button class="act-btn" onclick="openDetail(${e.id})" title="Voir / Modifier">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z"/></svg>
+          </button>
+          <button class="act-btn" onclick="deleteEntry(${e.id})" title="Supprimer" style="color:var(--danger);">
+            <svg fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+          </button>
+        </div>
+      </td>
+    </tr>`;
+  }).join('');
+
+  cont.innerHTML = `<table>${thead}<tbody>${tbody}</tbody></table>`;
+  updateStats();
+}
+
+// ============================================================
+//  MODAL FICHES COMMERCIAL
+// ============================================================
+let ficheComCurrent = null;
+let ficheEntryId = null;
+
+const COM_NAMES = { david: 'David', arthur: 'Arthur', valentin: 'Valentin' };
+const COM_COLORS = { david: '#3730a3', arthur: '#7e22ce', valentin: '#c2410c' };
+
+function openFichesCommercial(com) {
+  ficheComCurrent = com;
+  ficheEntryId = null;
+
+  const fiches = db.filter(e => e.commercial === com);
+  const title = document.getElementById('fiches-title');
+  title.innerHTML = `<span style="color:${COM_COLORS[com]}">Fiches de ${COM_NAMES[com]}</span> <span style="font-size:0.8rem; font-weight:400; color:var(--text-muted); margin-left:0.5rem;">${fiches.length} dossier${fiches.length > 1 ? 's' : ''}</span>`;
+
+  const list = document.getElementById('fiches-list');
+  if (fiches.length === 0) {
+    list.innerHTML = `<div style="font-size:0.8rem; color:var(--text-hint); padding:0.5rem 0;">Aucune fiche affectée.</div>`;
+  } else {
+    list.innerHTML = fiches.map(e => {
+      const statutDot = e.statut === 'en-cours' ? '#22a355' : e.statut === 'sans-suite' ? '#c13333' : '#aaa';
+      const nbLignes = countLines(e.notes);
+      return `<div class="fiche-item" id="fiche-item-${e.id}" onclick="selectFiche(${e.id})">
+        <div style="display:flex;align-items:center;gap:0.4rem;">
+          <span style="width:7px;height:7px;border-radius:50%;background:${statutDot};flex-shrink:0;display:inline-block;"></span>
+          <span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;">${e.nom}</span>
+        </div>
+        <div class="fiche-dpt">Dpt ${e.dpt} · ${nbLignes} note${nbLignes > 1 ? 's' : ''}</div>
+      </div>`;
+    }).join('');
+  }
+
+  document.getElementById('fiche-vide').style.display = 'block';
+  document.getElementById('fiche-detail-header').style.display = 'none';
+  document.getElementById('fiche-notes-zone').style.display = 'none';
+  document.getElementById('test-gratuit-banner').style.display = 'none';
+
+  document.getElementById('modal-fiches').classList.add('open');
+}
+
+function selectFiche(id) {
+  ficheEntryId = id;
+  const e = db.find(x => x.id === id);
+  if (!e) return;
+
+  document.querySelectorAll('.fiche-item').forEach(el => el.classList.remove('active'));
+  const item = document.getElementById(`fiche-item-${id}`);
+  if (item) item.classList.add('active');
+
+  const prest = [e.prestAtelier ? 'Atelier' : '', e.prestExt ? 'Ext.' : ''].filter(Boolean).join(' + ');
+  const statutLbl = { nouveau: 'Nouveau', 'en-cours': 'En cours', 'sans-suite': 'Sans suite' }[e.statut] || '';
+  document.getElementById('fiche-nom').textContent = e.nom;
+  document.getElementById('fiche-meta').innerHTML = `Dpt ${e.dpt} · ${prest} · <strong>${statutLbl}</strong>${e.tel ? ' · ' + e.tel : ''}${e.email ? ' · ' + e.email : ''}`;
+
+  const notesInput = document.getElementById('fiche-notes-input');
+  notesInput.value = e.notes || '';
+
+  document.getElementById('fiche-vide').style.display = 'none';
+  document.getElementById('fiche-detail-header').style.display = 'block';
+  document.getElementById('fiche-notes-zone').style.display = 'flex';
+
+  onNotesInput();
+}
+
+function countLines(text) {
+  if (!text || text.trim() === '') return 0;
+  return text.split('\n').filter(l => l.trim() !== '').length;
+}
+
+function onNotesInput() {
+  const val = document.getElementById('fiche-notes-input').value;
+  const nb = countLines(val);
+  const countEl = document.getElementById('notes-ligne-count');
+  countEl.textContent = `${nb} ligne${nb > 1 ? 's' : ''}`;
+  countEl.style.color = nb >= 2 ? 'var(--accent)' : 'var(--text-hint)';
+
+  const banner = document.getElementById('test-gratuit-banner');
+  banner.style.display = nb >= 2 ? 'flex' : 'none';
+}
+
+async function saveFicheNotes() {
+  const e = db.find(x => x.id === ficheEntryId);
+  if (!e) return;
+  e.notes = document.getElementById('fiche-notes-input').value;
+  const item = document.getElementById(`fiche-item-${ficheEntryId}`);
+  if (item) {
+    const nb = countLines(e.notes);
+    const dptEl = item.querySelector('.fiche-dpt');
+    if (dptEl) dptEl.textContent = `Dpt ${e.dpt} · ${nb} note${nb > 1 ? 's' : ''}`;
+  }
+  try {
+    await atUpdate(ficheEntryId, { notes: e.notes });
+    showToast('✓ Notes enregistrées.');
+  } catch(err) {
+    showToast('⚠ Sync Airtable : ' + err.message);
+  }
+}
+
+function closeFichesModal() {
+  document.getElementById('modal-fiches').classList.remove('open');
+  ficheComCurrent = null;
+  ficheEntryId = null;
+}
+
+// Fermer sur clic overlay
+document.getElementById('modal-fiches').addEventListener('click', function(e) {
+  if (e.target === this) closeFichesModal();
+});
+
+// ============================================================
+//  ASSIGN COMMERCIAL
+// ============================================================
+async function assignCommercial(id, com) {
+  const e = db.find(x => x.id === id);
+  if (!e) return;
+  const newCom = e.commercial === com ? '' : com;
+  e.commercial = newCom;
+  renderTable();
+  const names = {david:'David', arthur:'Arthur', valentin:'Valentin'};
+  showToast(newCom ? `✓ Dossier affecté à ${names[newCom]}.` : 'Affectation retirée.');
+  try { await atUpdate(id, { commercial: newCom }); }
+  catch(err) { showToast('⚠ Sync Airtable : ' + err.message); }
+}
+
+// ============================================================
+//  UPDATE STATUS
+// ============================================================
+async function updateStatus(id, val) {
+  const e = db.find(x => x.id === id);
+  if (!e) return;
+  e.statut = val;
+  renderTable();
+  try { await atUpdate(id, { statut: val }); }
+  catch(err) { showToast('⚠ Sync Airtable : ' + err.message); }
+}
+
+// ============================================================
+//  DETAIL MODAL
+// ============================================================
+function openDetail(id) {
+  const e = db.find(x => x.id === id);
+  if (!e) return;
+  currentEditId = id;
+
+  document.getElementById('modal-title').textContent = e.nom;
+  document.getElementById('modal-body').innerHTML = `
+    <div style="display:grid; gap:0.75rem;">
+      <div><label>Raison sociale</label><input type="text" id="m-nom" value="${e.nom}"></div>
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:0.75rem;">
+        <div><label>Département</label>
+          <select id="m-dpt">${DEPTS.map(([c,n]) => `<option value="${c}" ${e.dpt===c?'selected':''}>${c} – ${n}</option>`).join('')}</select>
+        </div>
+        <div><label>Téléphone</label><input type="tel" id="m-tel" value="${e.tel||''}"></div>
+      </div>
+      <div><label>E-mail</label><input type="email" id="m-email" value="${e.email||''}"></div>
+      <div>
+        <label>Prestations</label>
+        <div style="display:flex; gap:0.5rem; margin-top:0.35rem;">
+          <label class="prest-check ${e.prestAtelier?'checked':''}" id="m-chk-atelier" onclick="toggleModalPrest('atelier')">
+            <input type="checkbox" id="m-prest-atelier" ${e.prestAtelier?'checked':''}>
+            Atelier
+          </label>
+          <label class="prest-check ${e.prestExt?'checked':''}" id="m-chk-ext" onclick="toggleModalPrest('ext')">
+            <input type="checkbox" id="m-prest-ext" ${e.prestExt?'checked':''}>
+            Prestation ext.
+          </label>
+        </div>
+      </div>
+      <div><label>Statut</label>
+        <select id="m-statut">
+          <option value="nouveau" ${e.statut==='nouveau'?'selected':''}>Nouveau</option>
+          <option value="en-cours" ${e.statut==='en-cours'?'selected':''}>En cours</option>
+          <option value="gagne" ${e.statut==='gagne'?'selected':''}>🏆 Gagné</option>
+          <option value="sans-suite" ${e.statut==='sans-suite'?'selected':''}>Sans suite</option>
+        </select>
+      </div>
+      <div>
+        <label>Commercial affecté</label>
+        <div style="display:flex; gap:0.5rem; margin-top:0.35rem; flex-wrap:wrap;">
+          ${['david','arthur','valentin'].map(c => {
+            const labels = {david:'David', arthur:'Arthur', valentin:'Valentin'};
+            const active = e.commercial === c ? 'active' : '';
+            return `<button class="com-btn ${c} ${active}" id="m-com-${c}" onclick="toggleModalCom('${c}')">${labels[c]}</button>`;
+          }).join('')}
+        </div>
+        <input type="hidden" id="m-commercial" value="${e.commercial||''}">
+      </div>
+      <div><label>Notes</label><textarea id="m-notes" rows="3" style="resize:vertical;">${e.notes||''}</textarea></div>
+    </div>
+  `;
+
+  document.getElementById('modal-save-btn').onclick = saveDetail;
+  document.getElementById('modal-detail').classList.add('open');
+}
+
+function toggleModalCom(com) {
+  const hidden = document.getElementById('m-commercial');
+  const current = hidden.value;
+  const newVal = current === com ? '' : com;
+  hidden.value = newVal;
+  ['david','arthur','valentin'].forEach(c => {
+    const btn = document.getElementById('m-com-' + c);
+    if (btn) btn.classList.toggle('active', newVal === c);
+  });
+}
+
+function toggleModalPrest(type) {
+  if (type === 'atelier') {
+    const cb = document.getElementById('m-prest-atelier');
+    cb.checked = !cb.checked;
+    document.getElementById('m-chk-atelier').classList.toggle('checked', cb.checked);
+  } else {
+    const cb = document.getElementById('m-prest-ext');
+    cb.checked = !cb.checked;
+    document.getElementById('m-chk-ext').classList.toggle('checked', cb.checked);
+  }
+}
+
+async function saveDetail() {
+  const e = db.find(x => x.id === currentEditId);
+  if (!e) return;
+  e.nom          = document.getElementById('m-nom').value.trim() || e.nom;
+  e.dpt          = document.getElementById('m-dpt').value;
+  e.tel          = document.getElementById('m-tel').value.trim();
+  e.email        = document.getElementById('m-email').value.trim();
+  e.prestAtelier = document.getElementById('m-prest-atelier').checked;
+  e.prestExt     = document.getElementById('m-prest-ext').checked;
+  e.statut       = document.getElementById('m-statut').value;
+  e.commercial   = document.getElementById('m-commercial').value;
+  e.notes        = document.getElementById('m-notes').value.trim();
+  closeModal();
+  renderTable();
+  try {
+    showLoader(true);
+    await atUpdate(currentEditId, localToAt(e));
+    showToast('✓ Dossier mis à jour.');
+  } catch(err) {
+    showToast('⚠ Sync Airtable : ' + err.message);
+  } finally {
+    showLoader(false);
+  }
+}
+
+function closeModal() {
+  document.getElementById('modal-detail').classList.remove('open');
+}
+
+// ============================================================
+//  DELETE
+// ============================================================
+async function deleteEntry(id) {
+  if (!confirm('Supprimer ce dossier ?')) return;
+  db = db.filter(x => x.id !== id);
+  renderTable();
+  try {
+    await atDelete(id);
+    showToast('Dossier supprimé.');
+  } catch(err) {
+    showToast('⚠ Sync Airtable : ' + err.message);
+  }
+}
+
+// ============================================================
+//  FILTER
+// ============================================================
+function filterTable(btn) {
+  currentFilter = btn.dataset.filter;
+  document.querySelectorAll('.pill').forEach(p => p.classList.remove('active'));
+  btn.classList.add('active');
+  renderTable();
+}
+
+// ============================================================
+//  STATS
+// ============================================================
+function updateStats() {
+  document.getElementById('stat-total').textContent = db.length;
+  document.getElementById('stat-cours').textContent = db.filter(e => e.statut === 'en-cours').length;
+  document.getElementById('stat-nouveau').textContent = db.filter(e => e.statut === 'nouveau').length;
+  document.getElementById('stat-sans-suite').textContent = db.filter(e => e.statut === 'sans-suite').length;
+  document.getElementById('stat-gagne').textContent = db.filter(e => e.statut === 'gagne').length;
+
+  ['david','arthur','valentin'].forEach(c => {
+    const tous     = db.filter(e => e.commercial === c);
+    const actifs   = tous.filter(e => e.statut === 'en-cours' || e.statut === 'nouveau');
+    const gagnes   = tous.filter(e => e.statut === 'gagne');
+    const inactifs = tous.filter(e => e.statut === 'sans-suite');
+    document.getElementById(`stat-${c}-total`).textContent   = tous.length;
+    document.getElementById(`stat-${c}-actif`).textContent   = `${actifs.length} actif${actifs.length > 1 ? 's' : ''}`;
+    document.getElementById(`stat-${c}-inactif`).textContent = `${inactifs.length} inactif${inactifs.length > 1 ? 's' : ''}`;
+    const gagneEl = document.getElementById(`stat-${c}-gagne`);
+    if (gagneEl) {
+      gagneEl.textContent = `${gagnes.length} gagné${gagnes.length > 1 ? 's' : ''}`;
+      gagneEl.style.display = gagnes.length > 0 ? 'inline-block' : 'none';
+    }
+  });
+}
+
+// ============================================================
+//  TAB SWITCH
+// ============================================================
+function switchTab(name, btn) {
+  document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + name).classList.add('active');
+  btn.classList.add('active');
+  if (name === 'crm') renderTable();
+}
+
+// ============================================================
+//  PERSIST (Airtable)
+// ============================================================
+function save() {
+  updateStats(); // les vraies sauvegardes se font via atCreate/atUpdate/atDelete
+}
+
+// ============================================================
+//  TOAST
+// ============================================================
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// Modal close on overlay click
+document.getElementById('modal-detail').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+
+// Init — charge depuis Airtable
+loadFromAirtable();
+</script>
+</body>
+</html>
