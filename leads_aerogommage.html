@@ -826,7 +826,7 @@ function renderRattrapageHistorique(){
     if(!parApp[h.applicateur])parApp[h.applicateur]=[];
     parApp[h.applicateur].push(h);
   });
-  div.innerHTML='<div style="overflow-x:auto"><table><thead><tr><th>Applicateur</th><th>Année</th><th>Mois</th><th>Nb leads</th><th>Facturation</th><th></th></tr></thead><tbody>'+
+  div.innerHTML='<div style="overflow-x:auto"><table><thead><tr><th>applicateur</th><th>Année</th><th>Mois</th><th>Nb leads</th><th>Facturation</th><th></th></tr></thead><tbody>'+
     Object.entries(parApp).map(([appId,hList])=>{
       const app=apps.find(a=>a.id===appId);
       return [...hList].sort((a,b)=>a.annee===b.annee?a.mois-b.mois:a.annee-b.annee).map(h=>`<tr>
