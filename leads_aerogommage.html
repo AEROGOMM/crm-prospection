@@ -513,7 +513,7 @@ async function atPatch(table,id,fields){
 async function loadAll(){
   try{
     setStatus('Synchronisation...','');
-    const [ra,rl,rj,rh,rna,rat]=await Promise.all([atGet('Applicateurs'),atGet('Leads'),atGet('Journal_contacts'),atGet('Historique'),atGet('Leads_NA'),atGet('Leads_Attente')]);
+    const [ra,rl,rj,rh,rna,rat]=await Promise.all([atGet('applicateurs'),atGet('Leads'),atGet('Journal_contacts'),atGet('Historique'),atGet('Leads_NA'),atGet('Leads_Attente')]);
     apps=ra.map(r=>({id:r.id,...r.fields})).sort((a,b)=>(a.nom||'').localeCompare(b.nom||'','fr'));
     leads=rl.map(r=>({id:r.id,...r.fields}));
     journalData=rj.map(r=>({id:r.id,...r.fields}));
