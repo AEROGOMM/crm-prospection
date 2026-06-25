@@ -863,7 +863,7 @@ async function saveRattrapageTotal(){
     const existe=historique.find(h=>h.applicateur===appId&&h.annee===annee&&h.mois===m+1);
     if(existe){toast(`Mois ${m+1}/${annee} déjà enregistré — ignoré`,false);continue;}
     try{
-      const r=await atPost('Historique',{Applicateur:appId,annee,mois:m+1,nb_leads:nb,facturation:nb>=6?'normal':'gratuit'});
+      const r=await atPost('Historique',{applicateur:appId,annee,mois:m+1,nb_leads:nb,facturation:nb>=6?'normal':'gratuit'});
       historique.push({id:r.records[0].id,...r.records[0].fields});
       ok++;
     }catch(e){console.warn('Erreur historique:',e.message);}
