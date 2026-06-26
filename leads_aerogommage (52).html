@@ -1,0 +1,2021 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suivi Leads — Réseau Aérогоmmage</title>
+<style>
+:root{
+  --bg:#0f1117;--surface:#1a1d27;--surface2:#22263a;--border:#2e3248;
+  --accent:#6c63ff;--accent2:#ff6584;--accent3:#43e97b;--orange:#ffa040;
+  --text:#e8eaf6;--muted:#7b82a8;--radius:10px;--radius-lg:14px;
+  --shadow:0 2px 12px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:14px 24px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100}
+.topbar-left{display:flex;align-items:center;gap:14px}
+.logo{width:36px;height:36px;background:linear-gradient(135deg,var(--accent),var(--accent2));border-radius:9px;display:flex;align-items:center;justify-content:center;font-size:16px}
+.topbar h1{font-size:15px;font-weight:600}.topbar h1 span{color:var(--muted);font-weight:400}
+.sync-badge{font-size:11px;background:var(--surface2);border:1px solid var(--border);color:var(--muted);padding:4px 10px;border-radius:20px}
+.sync-badge.ok{border-color:#43e97b44;color:#43e97b}.sync-badge.err{border-color:#ff658444;color:#ff6584}
+.tabs{display:flex;gap:4px;padding:16px 20px 0;overflow-x:auto;background:var(--surface);border-bottom:1px solid var(--border)}
+.tab{padding:10px 16px;font-size:12px;cursor:pointer;border:none;background:none;color:var(--muted);border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;font-family:inherit;border-radius:8px 8px 0 0;transition:color .15s}
+.tab:hover{color:var(--text);background:var(--surface2)}
+.tab.active{color:var(--text);border-bottom:2px solid var(--accent);font-weight:500;background:var(--surface2)}
+.container{max-width:1200px;margin:0 auto;padding:20px 16px}
+.section{display:none}.section.active{display:block}
+.card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px;margin-bottom:16px;box-shadow:var(--shadow)}
+.card-title{font-size:13px;font-weight:600;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.card-title::before{content:'';width:3px;height:14px;background:var(--accent);border-radius:2px;display:inline-block}
+.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:16px}
+.grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:10px;margin-bottom:16px}
+@media(max-width:700px){.grid4,.grid5{grid-template-columns:repeat(2,1fr)}}
+.metric{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;text-align:center}
+.metric-label{font-size:10px;color:var(--muted);margin-bottom:6px;text-transform:uppercase;letter-spacing:.5px}
+.metric-value{font-size:24px;font-weight:700}
+.metric.c-accent .metric-value{color:var(--accent)}
+.metric.c-green  .metric-value{color:var(--accent3)}
+.metric.c-pink   .metric-value{color:var(--accent2)}
+.metric.c-orange .metric-value{color:var(--orange)}
+.metric.c-red    .metric-value{color:#ff4444}
+label{font-size:11px;color:var(--muted);display:block;margin-bottom:4px;margin-top:10px;text-transform:uppercase;letter-spacing:.4px}
+input,select,textarea{width:100%;font-size:13px;padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface2);color:var(--text);font-family:inherit;transition:border .15s}
+input:focus,select:focus{outline:none;border-color:var(--accent)}
+select option{background:var(--surface2)}
+textarea{height:60px;resize:vertical}
+.row{display:flex;gap:12px}.col{flex:1}
+.combo{position:relative}
+.combo-list{display:none;position:absolute;top:calc(100% + 4px);left:0;right:0;max-height:240px;overflow-y:auto;background:var(--surface2);border:1px solid var(--border);border-radius:8px;z-index:50;box-shadow:var(--shadow)}
+.combo-list.open{display:block}
+.combo-item{padding:8px 12px;font-size:13px;cursor:pointer;color:var(--text)}
+.combo-item:hover,.combo-item.active{background:var(--accent);color:#fff}
+.combo-item.empty{color:var(--muted);cursor:default;font-style:italic}
+@media(max-width:600px){.row{flex-direction:column}}
+.btn{padding:9px 18px;font-size:12px;cursor:pointer;border-radius:8px;border:1px solid var(--border);background:var(--surface2);color:var(--text);font-family:inherit;font-weight:500;transition:all .15s}
+.btn:hover{background:var(--border)}
+.btn-primary{background:var(--accent);color:#fff;border-color:var(--accent)}.btn-primary:hover{background:#5a52d5}
+.btn-sm{padding:4px 10px;font-size:11px}
+.btn-green{background:#43e97b22;color:#43e97b;border-color:#43e97b44}.btn-green:hover{background:#43e97b33}
+.btn-purple{background:#6c63ff22;color:#a89cff;border-color:#6c63ff44}.btn-purple:hover{background:#6c63ff33}
+.btn-orange{background:#ffa04022;color:#ffa040;border-color:#ffa04044}.btn-orange:hover{background:#ffa04033}
+.btn-orange{background:#ffa04022;color:#ffa040;border-color:#ffa04044}.btn-orange:hover{background:#ffa04033}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{text-align:left;padding:10px 12px;font-weight:500;font-size:10px;color:var(--muted);border-bottom:1px solid var(--border);text-transform:uppercase;letter-spacing:.5px;white-space:nowrap}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle}
+tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--surface2)}
+.badge{font-size:10px;padding:3px 8px;border-radius:5px;display:inline-block;font-weight:600;white-space:nowrap}
+.b-abo   {background:#6c63ff22;color:#a89cff;border:1px solid #6c63ff33}
+.b-dec   {background:#ffa04022;color:#ffc070;border:1px solid #ffa04033}
+.b-stop  {background:#ff658422;color:#ff8fa3;border:1px solid #ff658433}
+.b-prest {background:#43e97b22;color:#43e97b;border:1px solid #43e97b33}
+.b-ext   {background:#ffa04044;color:#ffa040;border:1px solid #ffa04066;animation:pulse 2s infinite}
+.b-gratuit{background:#ff658433;color:#ff8fa3;border:1px solid #ff658466}
+.b-avance {background:#6c63ff33;color:#a89cff;border:1px solid #6c63ff66}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}}
+.aok    {background:#43e97b22;color:#43e97b;border:1px solid #43e97b44;border-radius:7px;padding:5px 10px;font-size:11px;display:inline-block}
+.awarn  {background:#ffa04022;color:#ffc070;border:1px solid #ffa04033;border-radius:7px;padding:5px 10px;font-size:11px;display:inline-block}
+.adanger{background:#ff658422;color:#ff8fa3;border:1px solid #ff658433;border-radius:7px;padding:5px 10px;font-size:11px;display:inline-block}
+.apurple{background:#6c63ff22;color:#a89cff;border:1px solid #6c63ff33;border-radius:7px;padding:5px 10px;font-size:11px;display:inline-block}
+.aorange{background:#ffa04022;color:#ffa040;border:1px solid #ffa04033;border-radius:7px;padding:5px 10px;font-size:11px;display:inline-block}
+.alert-block{display:block;padding:10px 14px;margin-bottom:8px;border-radius:8px;font-size:12px;border-left:3px solid}
+.card-app{background:var(--surface2);border:1px solid var(--border);border-radius:var(--radius);padding:14px 16px;margin-bottom:10px;transition:border .2s}
+.card-app.urgent{border-color:#ff658455;box-shadow:0 0 0 1px #ff658422}
+.card-app.warn  {border-color:#ffa04055;box-shadow:0 0 0 1px #ffa04022}
+.card-app.good  {border-color:#43e97b55}
+.card-app.ext   {border-color:#ffa04088;box-shadow:0 0 8px #ffa04033}
+.prog-bar{height:6px;background:var(--border);border-radius:3px;margin-top:8px;overflow:hidden}
+.prog-fill{height:6px;border-radius:3px;transition:width .4s}
+/* barre divisée en zones */
+.prog-zones{height:6px;background:var(--border);border-radius:3px;margin-top:8px;position:relative;overflow:hidden}
+.prog-zone-ok {position:absolute;left:0;height:100%;background:#43e97b}
+.prog-zone-ext{position:absolute;height:100%;background:#ffa040}
+.journal-entry{background:var(--surface);border:1px solid var(--border);border-radius:7px;padding:8px 12px;margin-bottom:6px;font-size:12px;border-left:3px solid var(--accent)}
+.msg-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:12px 16px;font-size:12px;color:var(--text);margin-top:8px;white-space:pre-wrap;line-height:1.7;border-left:3px solid var(--accent)}
+.contact-form{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px;margin-bottom:12px}
+.sep{height:1px;background:var(--border);margin:14px 0}
+.loading{color:var(--muted);font-size:12px;padding:12px 0;font-style:italic}
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface2);border:1px solid var(--accent);color:var(--text);padding:10px 18px;border-radius:10px;font-size:13px;z-index:9999;opacity:0;transform:translateY(10px);transition:all .25s;pointer-events:none;box-shadow:var(--shadow)}
+.toast.show{opacity:1;transform:translateY(0)}
+/* compteur mensuel visuel */
+.monthly-counter{display:flex;gap:4px;flex-wrap:wrap;margin-top:10px}
+.lead-dot{width:20px;height:20px;border-radius:4px;background:var(--border);transition:background .2s}
+.lead-dot.filled{background:var(--accent)}
+.lead-dot.ext-filled{background:var(--orange)}
+.lead-dot.limit{border:1px dashed var(--orange)}
+</style>
+</head>
+<body>
+<div class="topbar">
+  <div class="topbar-left">
+    <div class="logo">📋</div>
+    <h1>Leads Réseau <span>Aérогоmmage</span></h1>
+  </div>
+  <span class="sync-badge" id="sync-status">Chargement...</span>
+</div>
+<div class="tabs">
+  <button class="tab active" onclick="showTab('saisie',this)">＋ Saisir un lead</button>
+  <button class="tab" onclick="showTab('synthese',this)">📊 Synthèse & alertes</button>
+  <button class="tab" onclick="showTab('p131',this)">📅 Période 1–31</button>
+  <button class="tab" onclick="showTab('p1514',this)">📅 Période 15–14</button>
+  <button class="tab" onclick="showTab('decouverte',this)">⭐ Test découverte</button>
+  <button class="tab" onclick="showTab('nonattribues',this)">📭 Leads non attribués</button>
+  <button class="tab" onclick="showTab('attente',this)">⏳ Leads en attente</button>
+  <button class="tab" onclick="showTab('rattrapage',this)">📅 Rattrapage historique</button>
+  <button class="tab" onclick="showTab('applicateurs',this)">👥 Applicateurs</button>
+</div>
+<div class="container">
+
+<!-- SAISIE -->
+<div id="tab-saisie" class="section active">
+  <div class="card">
+    <p class="card-title">Total adhérents</p>
+    <div id="totaux-adherents"><p class="loading">Chargement...</p></div>
+  </div>
+  <div class="card">
+    <p class="card-title">Nouveau lead — 1 devis envoyé = 1 lead</p>
+    <div class="row">
+      <div class="col">
+        <label>Applicateur</label>
+        <div class="combo">
+          <input type="text" id="s-app-search" placeholder="Rechercher un applicateur..." autocomplete="off" onfocus="openCombo('s-app')" oninput="filterCombo('s-app')">
+          <input type="hidden" id="s-app">
+          <div class="combo-list" id="s-app-list"></div>
+        </div>
+      </div>
+      <div class="col">
+        <label>Prestation</label>
+        <div class="combo">
+          <input type="text" id="s-prest-search" placeholder="Rechercher une prestation..." autocomplete="off" onfocus="openCombo('s-prest')" oninput="filterCombo('s-prest')">
+          <input type="hidden" id="s-prest">
+          <div class="combo-list" id="s-prest-list"></div>
+        </div>
+      </div>
+      <div class="col" style="max-width:160px">
+        <label>Date</label>
+        <input type="date" id="s-date">
+      </div>
+    </div>
+    <div id="saisie-status" style="margin-top:12px;display:none"></div>
+    <div style="margin-top:12px;display:flex;align-items:center;gap:10px">
+      <button class="btn btn-primary" onclick="saveLead()">✓ Enregistrer</button>
+      <span id="badge-attente" style="display:none;background:#ff658422;color:#ff8fa3;border:1px solid #ff658444;border-radius:7px;padding:5px 12px;font-size:12px">📬 Lead stocké en attente de règlement</span>
+      <span id="save-msg" style="font-size:12px;color:var(--muted)"></span>
+    </div>
+  </div>
+  <div class="card">
+    <p class="card-title">30 derniers leads</p>
+    <div id="recent-leads"><p class="loading">Chargement...</p></div>
+  </div>
+</div>
+
+<!-- SYNTHESE -->
+<div id="tab-synthese" class="section">
+  <div class="grid5">
+    <div class="metric c-accent"><div class="metric-label">Leads ce mois</div><div class="metric-value" id="m-mois">—</div></div>
+    <div class="metric c-green" ><div class="metric-label">Leads année</div><div class="metric-value" id="m-an">—</div></div>
+    <div class="metric"         ><div class="metric-label">Abonnés actifs</div><div class="metric-value" id="m-abo">—</div></div>
+    <div class="metric c-orange"><div class="metric-label">Tests en cours</div><div class="metric-value" id="m-tests">—</div></div>
+    <div class="metric c-pink"  ><div class="metric-label">Extensions actives</div><div class="metric-value" id="m-ext">—</div></div>
+  </div>
+  <div class="card">
+    <p class="card-title">Alertes</p>
+    <div id="alertes-zone"><p class="loading">Chargement...</p></div>
+  </div>
+  <div class="card">
+    <p class="card-title">Tableau par applicateur</p>
+    <div style="overflow-x:auto">
+      <table><thead><tr>
+        <th>Applicateur</th><th>Statut</th><th>Leads mois</th>
+        <th>Carnet</th><th>Extension 13–20</th>
+        <th>YTD</th><th>Alerte facturation</th>
+      </tr></thead><tbody id="synth-body"><tr><td colspan="7" class="loading">Chargement...</td></tr></tbody></table>
+    </div>
+  </div>
+</div>
+
+<!-- PERIODE 1-31 -->
+<div id="tab-p131" class="section">
+  <div class="card">
+    <p class="card-title">Abonnés — période 1 au 31</p>
+    <div id="bloc-p131"><p class="loading">Chargement...</p></div>
+  </div>
+</div>
+
+<!-- PERIODE 15-14 -->
+<div id="tab-p1514" class="section">
+  <div class="card">
+    <p class="card-title">Abonnés — période 15 au 14</p>
+    <div id="bloc-p1514"><p class="loading">Chargement...</p></div>
+  </div>
+</div>
+
+<!-- TEST DECOUVERTE -->
+<div id="tab-decouverte" class="section">
+  <div class="card">
+    <p class="card-title">Tests découverte réseau — suivi & relances</p>
+    <div id="bloc-decouverte"><p class="loading">Chargement...</p></div>
+  </div>
+</div>
+
+<!-- LEADS EN ATTENTE -->
+<div id="tab-attente" class="section">
+  <div class="card">
+    <p class="card-title">⏳ Leads en attente de règlement</p>
+    <div id="bloc-attente"><p class="loading">Chargement...</p></div>
+  </div>
+</div>
+
+<!-- RATTRAPAGE HISTORIQUE -->
+<div id="tab-rattrapage" class="section">
+  <div class="card">
+    <p class="card-title">📅 Rattrapage historique — intégration dans la moyenne annuelle</p>
+    <p style="font-size:12px;color:var(--muted);margin-bottom:16px">Saisissez ici les leads transmis sur des mois passés pour qu'ils soient pris en compte dans le calcul de la moyenne annuelle.</p>
+
+    <!-- MODE 1 : Total global -->
+    <div style="background:var(--surface2);border-radius:var(--border-radius-lg);padding:14px 16px;margin-bottom:12px">
+      <p style="font-size:13px;font-weight:600;margin-bottom:10px">Mode 1 — Total global sur une période</p>
+      <div class="row">
+        <div class="col">
+          <label>Applicateur</label>
+          <select id="ratt-app"><option value="">— choisir —</option></select>
+        </div>
+        <div class="col" style="max-width:130px">
+          <label>Mois début</label>
+          <select id="ratt-mois-debut">
+            <option value="0">Janvier</option><option value="1">Février</option>
+            <option value="2">Mars</option><option value="3">Avril</option>
+            <option value="4">Mai</option><option value="5">Juin</option>
+            <option value="6">Juillet</option><option value="7">Août</option>
+            <option value="8">Septembre</option><option value="9">Octobre</option>
+            <option value="10">Novembre</option><option value="11">Décembre</option>
+          </select>
+        </div>
+        <div class="col" style="max-width:130px">
+          <label>Mois fin</label>
+          <select id="ratt-mois-fin">
+            <option value="0">Janvier</option><option value="1">Février</option>
+            <option value="2">Mars</option><option value="3">Avril</option>
+            <option value="4" selected>Mai</option><option value="5">Juin</option>
+            <option value="6">Juillet</option><option value="7">Août</option>
+            <option value="8">Septembre</option><option value="9">Octobre</option>
+            <option value="10">Novembre</option><option value="11">Décembre</option>
+          </select>
+        </div>
+        <div class="col" style="max-width:120px">
+          <label>Année</label>
+          <input type="number" id="ratt-annee" value="2026" min="2020" max="2030">
+        </div>
+        <div class="col" style="max-width:120px">
+          <label>Nb leads total</label>
+          <input type="number" id="ratt-total" placeholder="ex. 30" min="0">
+        </div>
+      </div>
+      <div style="margin-top:12px;display:flex;align-items:center;gap:10px">
+        <button class="btn btn-primary" onclick="saveRattrapageTotal()">✓ Répartir et enregistrer</button>
+        <span style="font-size:11px;color:var(--muted)">Les leads seront répartis équitablement entre les mois sélectionnés</span>
+      </div>
+    </div>
+
+    <!-- MODE 2 : Détail par mois -->
+    <div style="background:var(--surface2);border-radius:var(--border-radius-lg);padding:14px 16px">
+      <p style="font-size:13px;font-weight:600;margin-bottom:10px">Mode 2 — Détail mois par mois</p>
+      <div class="row" style="margin-bottom:10px">
+        <div class="col">
+          <label>Applicateur</label>
+          <select id="ratt-app2"><option value="">— choisir —</option></select>
+        </div>
+        <div class="col" style="max-width:120px">
+          <label>Année</label>
+          <input type="number" id="ratt-annee2" value="2026" min="2020" max="2030">
+        </div>
+      </div>
+      <div id="ratt-mois-grid" style="display:grid;grid-template-columns:repeat(6,1fr);gap:8px;margin-bottom:12px">
+      </div>
+      <div style="display:flex;align-items:center;gap:10px">
+        <button class="btn btn-primary" onclick="saveRattrapageDetail()">✓ Enregistrer le détail</button>
+        <span id="ratt-msg" style="font-size:12px;color:var(--muted)"></span>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <p class="card-title">Historique enregistré</p>
+    <div id="ratt-historique"><p class="loading">Chargement...</p></div>
+  </div>
+</div>
+
+<!-- LEADS NON ATTRIBUES -->
+<div id="tab-nonattribues" class="section">
+  <div class="card">
+    <p class="card-title">Saisir un lead non attribué</p>
+    <div class="row">
+      <div class="col" style="max-width:160px">
+        <label>Département</label>
+        <input type="text" id="na-dept" placeholder="ex. 35" maxlength="3">
+      </div>
+      <div class="col">
+        <label>Prestation</label>
+        <select id="na-prest">
+          <option value="">— choisir —</option>
+        </select>
+      </div>
+      <div class="col" style="max-width:160px">
+        <label>Date</label>
+        <input type="date" id="na-date">
+      </div>
+    </div>
+    <div style="margin-top:12px;display:flex;align-items:center;gap:10px">
+      <button class="btn btn-primary" onclick="saveLeadNA()">✓ Enregistrer</button>
+      <span id="na-msg" style="font-size:12px;color:var(--muted)"></span>
+    </div>
+  </div>
+  <div class="card">
+    <p class="card-title">Synthèse annuelle</p>
+    <div id="na-synthese"><p class="loading">Chargement...</p></div>
+  </div>
+  <div class="card">
+    <p class="card-title">Liste par département</p>
+    <div id="na-liste"><p class="loading">Chargement...</p></div>
+  </div>
+</div>
+
+<!-- APPLICATEURS -->
+<div id="tab-applicateurs" class="section">
+  <div class="card">
+    <p class="card-title" id="app-form-title">Ajouter un applicateur</p>
+    <input type="hidden" id="a-edit-id" value="">
+    <div class="row">
+      <div class="col"><label>Nom / domaine</label><input type="text" id="a-nom" placeholder="ex. AEROGOMMAGE35.FR"></div>
+      <div class="col">
+        <label>Catégorie</label>
+        <select id="a-cat" onchange="toggleCatFields()">
+          <option value="abonne">Abonné</option>
+          <option value="decouverte">Test découverte</option>
+          <option value="stop">Stop</option>
+        </select>
+      </div>
+    </div>
+    <div id="champs-abonne">
+      <div class="row">
+        <div class="col"><label>Type période</label><select id="a-type"><option value="1-31">1 – 31</option><option value="15-14">15 – 14</option></select></div>
+        <div class="col"><label>Objectif leads / mois</label><input type="number" id="a-obj" placeholder="ex. 6" min="1" value="6"></div>
+      </div>
+      <div class="row">
+        <div class="col"><label>Date d'adhésion</label><input type="date" id="a-adhesion"></div>
+        <div class="col" style="max-width:160px"><label>Commercial interne</label><div style="display:flex;align-items:center;gap:8px;margin-top:8px"><input type="checkbox" id="a-interne" style="width:auto;width:18px;height:18px"> <span style="font-size:12px;color:var(--muted)">Exclure du réseau</span></div></div>
+        <div class="col"><label>Email applicateur</label><input type="email" id="a-email" placeholder="ex. contact@applicateur.fr"></div>
+      </div>
+    </div>
+    <div id="champs-decouverte" style="display:none">
+      <div class="row">
+        <div class="col"><label>Date début test</label><input type="date" id="a-debut"></div>
+        <div class="col"><label>Téléphone (WhatsApp / SMS)</label><input type="text" id="a-tel" placeholder="ex. 06 XX XX XX XX"></div>
+      </div>
+      <div class="row">
+        <div class="col"><label>Email applicateur</label><input type="email" id="a-email-dec" placeholder="ex. contact@applicateur.fr"></div>
+      </div>
+    </div>
+    <div style="margin-top:14px;display:flex;align-items:center;gap:10px">
+      <button class="btn btn-primary" id="app-form-btn" onclick="saveApp()">＋ Ajouter</button>
+      <button class="btn" id="app-form-cancel" onclick="cancelEditApp()" style="display:none">Annuler</button>
+      <span id="a-msg" style="font-size:12px;color:var(--muted)"></span>
+    </div>
+  </div>
+  <div class="card">
+    <p class="card-title">Liste complète</p>
+    <table><thead><tr><th>Nom</th><th>Catégorie</th><th>Période</th><th>Obj./mois</th><th>Règlement</th><th>Extension ce mois</th><th>Tél</th><th></th></tr></thead>
+    <tbody id="app-body"><tr><td colspan="7" class="loading">Chargement...</td></tr></tbody></table>
+  </div>
+</div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const AT_TOKEN='patQgPTOIdBvWUjyY.558cdf938f80ded065b91e11e117ab9f63dd6f2a7e8c99d8387a40043b5cf994';
+const AT_BASE='appaGCOS3oYqU6DQh';
+const AT_URL=`https://api.airtable.com/v0/${AT_BASE}`;
+const HDR={'Authorization':`Bearer ${AT_TOKEN}`,'Content-Type':'application/json'};
+const MOIS=['jan','fév','mar','avr','mai','juin','juil','aoû','sep','oct','nov','déc'];
+const PRESTS={SOL:'Sols',FAC:'Façades',BOI:'Bois',PIE:'Pierre',MOB:'Mobilier',VEH:'Véhicules',IND:'Industrie',GT:'Grands travaux',POU:'Poutres',ESC:'Escaliers',AUT:'Autre',VOL:'Volets',MUR:'Murs',GRI:'Grilles',BAT:'Bateaux',PLA:'Plafonds',POR:'Portails',LOC:'Locaux',TER:'Terrasses',CUI:'Cuisines',JAN:'Jantes',RAM:'Rampes',CHE:'Cheminées',CHA:'Charpentes',RAD:'Radiateurs',VEL:'Vélos'};
+const LUCAS_EMAIL='pointgomm.propositiondecontact@gmail.com';
+
+function boostFacebook(nom, dept, nbLeads, niveau){
+  const sujet=encodeURIComponent(`Boost Facebook requis — Département ${dept}`);
+  const corps=encodeURIComponent(
+`Bonjour Lucas,
+
+Un boost publicitaire Facebook est nécessaire sur le secteur suivant :
+
+Département : ${dept}
+Applicateur : ${nom}
+Leads ce mois : ${nbLeads}
+Niveau d'alerte : ${niveau}
+
+Merci de lancer le boost dès que possible.
+
+Cordialement`
+  );
+  window.location.href=`mailto:${LUCAS_EMAIL}?subject=${sujet}&body=${corps}`;
+}
+
+let apps=[],leads=[],journalData=[],historique=[],leadsNA=[],leadsAttente=[];
+// extensions[appId+'-'+YYYY-MM] = true/false
+let extensions={};
+// reglements[appId+'-'+YYYY-MM] = true/false (validé)
+let reglements={};
+// reglementsExt[appId+'-'+YYYY-MM] = true/false (règlement extension validé)
+let reglementsExt={};
+
+function reglKey(appId,year,month){return`regl_${appId}-${year}-${String(month+1).padStart(2,'0')}`;}
+function reglExtKey(appId,year,month){return`reglext_${appId}-${year}-${String(month+1).padStart(2,'0')}`;}
+function isReglValide(appId,year,month){return!!reglements[reglKey(appId,year,month)];}
+function isReglExtValide(appId,year,month){return!!reglementsExt[reglExtKey(appId,year,month)];}
+function saveReglements(){localStorage.setItem('aero_regl',JSON.stringify(reglements));}
+function saveReglementsExt(){localStorage.setItem('aero_regl_ext',JSON.stringify(reglementsExt));}
+
+async function toggleReglement(appId,year,month){
+  const k=reglKey(appId,year,month);
+  const etaitValide=reglements[k];
+  reglements[k]=!reglements[k];
+  saveReglements();
+
+  if(reglements[k]){
+    // Vient d'être validé → libérer les leads en attente
+    const attente=leadsAttente.filter(l=>l.applicateur===appId);
+    if(attente.length>0){
+      toast(`✓ Règlement validé — libération de ${attente.length} lead(s) en attente...`);
+      let liberes=0;
+      for(const l of attente){
+        try{
+          // Enregistrer dans Leads
+          const r=await atPost('Leads',{
+            applicateur:l.applicateur,
+            prestation:l.prestation,
+            date:l.date,
+            statut:'transmis'
+          });
+          leads.push({id:r.records[0].id,...r.records[0].fields});
+          // Supprimer de Leads_Attente
+          await atDelete('Leads_Attente',l.id);
+          leadsAttente=leadsAttente.filter(x=>x.id!==l.id);
+          liberes++;
+        }catch(e){console.warn('Erreur libération lead:',e.message);}
+      }
+      toast(`✓ ${liberes} lead(s) libéré(s) et transmis à ${(apps.find(a=>a.id===appId)||{}).nom||''}`);
+    }else{
+      toast('✓ Règlement validé — enregistrement des leads autorisé');
+    }
+  }else{
+    toast('Validation annulée');
+  }
+  render();
+}
+
+// Calcule l'état règlement pour un applicateur selon sa période
+function reglState(appId, typePeriode){
+  const now=new Date();
+  const jour=now.getDate();
+  const pb=getPeriodeBounds(typePeriode,now);
+  const valide=isReglValide(appId,pb.year,pb.month);
+
+  // Seuil d'affichage du bouton (avertissement)
+  const seuilAffichage=typePeriode==='15-14'?10:25;
+  const boutonVisible=jour>=seuilAffichage;
+
+  // Blocage uniquement au 1er jour de la NOUVELLE période si pas validé
+  // Pour 1-31 : bloqué si jour=1 et pas validé ce mois
+  // Pour 15-14 : bloqué si jour=15 et pas validé cette période
+  let bloque=false;
+  if(typePeriode==='1-31' && jour===1 && !valide) bloque=true;
+  if(typePeriode==='15-14' && jour===15 && !valide) bloque=true;
+
+  return{valide, boutonVisible, bloque, pbYear:pb.year, pbMonth:pb.month};
+}
+
+
+function toast(msg,ok=true){
+  const el=document.getElementById('toast');
+  el.textContent=msg;el.style.borderColor=ok?'var(--accent)':'#ff6584';
+  el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2800);
+}
+function setStatus(msg,state=''){
+  const el=document.getElementById('sync-status');
+  el.textContent=msg;el.className='sync-badge '+state;
+}
+
+async function atGet(table){
+  let recs=[],offset=null;
+  do{
+    const url=`${AT_URL}/${encodeURIComponent(table)}`+(offset?`?offset=${offset}`:'');
+    const res=await fetch(url,{headers:HDR});
+    const d=await res.json();
+    if(d.error)throw new Error(d.error.message);
+    recs=[...recs,...(d.records||[])];offset=d.offset||null;
+  }while(offset);
+  return recs;
+}
+async function atPost(table,fields){
+  const res=await fetch(`${AT_URL}/${encodeURIComponent(table)}`,{method:'POST',headers:HDR,body:JSON.stringify({records:[{fields}]})});
+  const d=await res.json();if(d.error)throw new Error(d.error.message);return d;
+}
+async function atDelete(table,id){
+  const res=await fetch(`${AT_URL}/${encodeURIComponent(table)}/${id}`,{method:'DELETE',headers:HDR});
+  const d=await res.json();if(d.error)throw new Error(d.error.message);
+}
+async function atPatch(table,id,fields){
+  const res=await fetch(`${AT_URL}/${encodeURIComponent(table)}/${id}`,{method:'PATCH',headers:HDR,body:JSON.stringify({fields})});
+  const d=await res.json();if(d.error)throw new Error(d.error.message);return d;
+}
+
+async function loadAll(){
+  try{
+    setStatus('Synchronisation...','');
+    const [ra,rl,rj,rh,rna,rat]=await Promise.all([atGet('Applicateurs'),atGet('Leads'),atGet('Journal_contacts'),atGet('Historique'),atGet('Leads_NA'),atGet('Leads_Attente')]);
+    apps=ra.map(r=>({id:r.id,...r.fields})).sort((a,b)=>(a.nom||'').localeCompare(b.nom||'','fr'));
+    leads=rl.map(r=>({id:r.id,...r.fields}));
+    journalData=rj.map(r=>({id:r.id,...r.fields}));
+    historique=rh.map(r=>({id:r.id,...r.fields}));
+    leadsNA=rna.map(r=>({id:r.id,...r.fields}));
+    leadsAttente=rat.map(r=>({id:r.id,...r.fields}));
+    // Charger extensions depuis localStorage
+    try{const e=localStorage.getItem('aero_ext');if(e)extensions=JSON.parse(e);}catch(e){}
+    try{const r=localStorage.getItem('aero_regl');if(r)reglements=JSON.parse(r);}catch(e){}
+    try{const r=localStorage.getItem('aero_regl_ext');if(r)reglementsExt=JSON.parse(r);}catch(e){}
+    setStatus('✓ Synchronisé — '+new Date().toLocaleTimeString('fr-FR'),'ok');
+    render();
+  }catch(e){
+    setStatus('⚠ Erreur connexion','err');
+    document.querySelectorAll('.loading').forEach(el=>el.textContent='Erreur : '+e.message);
+  }
+}
+
+function saveExtensions(){localStorage.setItem('aero_ext',JSON.stringify(extensions));}
+
+// Calcul cumul et moyenne annuelle — règle du 23
+function getStatsAnnuelles(appId, year){
+  const now = new Date();
+  const moisCourant = now.getMonth(); // 0-11
+  const jourCourant = now.getDate();
+  const inclureMoisCourant = jourCourant >= 23;
+
+  // Date d'adhésion de l'applicateur
+  const app = apps.find(a => a.id === appId);
+  let moisDebut = 0; // janvier par défaut
+  if(app && app.date_adhesion){
+    const dateAdh = new Date(app.date_adhesion);
+    if(dateAdh.getFullYear() === year){
+      moisDebut = dateAdh.getMonth(); // mois de début si adhésion en cours d'année
+    }
+  }
+
+  // Leads depuis Airtable pour l'année (depuis le mois d'adhésion)
+  const lAn = leads.filter(l => {
+    if(!l.date) return false;
+    const d = new Date(l.date);
+    return l.applicateur === appId && d.getFullYear() === year && d.getMonth() >= moisDebut;
+  });
+
+  // Leads depuis l'historique (mois passés saisis en rattrapage)
+  const hAn = historique.filter(h => h.applicateur === appId && h.annee === year && (h.mois-1) >= moisDebut);
+
+  // Nombre de mois à inclure dans la moyenne (depuis le mois d'adhésion)
+  const nbMoisTermines = moisCourant - moisDebut;
+  const nbMoisCalc = inclureMoisCourant ? nbMoisTermines + 1 : nbMoisTermines;
+
+  // Cumul leads directs
+  const cumulLeads = lAn.length;
+
+  // Cumul historique (rattrapage)
+  const cumulHistorique = hAn.reduce((sum, h) => sum + (h.nb_leads || 0), 0);
+
+  const cumul = cumulLeads + cumulHistorique;
+  const moyenne = nbMoisCalc > 0 ? (cumul / nbMoisCalc) : 0;
+
+  return { cumul, moyenne: Math.round(moyenne * 10) / 10, nbMoisCalc, inclureMoisCourant };
+}
+
+// Archiver le mois en cours dans Historique
+async function archiverMois(appId, year, month, nbLeads, ext, facturation){
+  // Vérifier si déjà archivé
+  const existe = historique.find(h => h.applicateur === appId && h.annee === year && h.mois === month + 1);
+  if(existe) return;
+  try{
+    const r = await atPost('Historique', {
+      applicateur: appId,
+      annee: year,
+      mois: month + 1,
+      nb_leads: nbLeads,
+      extension: ext,
+      facturation: facturation
+    });
+    historique.push({id: r.records[0].id, ...r.records[0].fields});
+  }catch(e){ console.warn('Archivage historique :', e.message); }
+}
+
+function extKey(appId,year,month){return`${appId}-${year}-${String(month+1).padStart(2,'0')}`;}
+
+function isExtActive(appId,year,month){return!!extensions[extKey(appId,year,month)];}
+
+async function toggleExt(appId,year,month){
+  const k=extKey(appId,year,month);
+  const etaitActive=extensions[k];
+  extensions[k]=!extensions[k];
+  saveExtensions();
+  if(extensions[k]){
+    toast('📒 Extension 13–20 activée — saisie des leads 13-20 en attente de règlement');
+  }else{
+    toast('Extension désactivée');
+  }
+  render();
+}
+
+async function validerReglExt(appId,year,month){
+  const k=reglExtKey(appId,year,month);
+  reglementsExt[k]=!reglementsExt[k];
+  saveReglementsExt();
+  if(reglementsExt[k]){
+    // Libérer les leads en attente de type extension
+    const attente=leadsAttente.filter(l=>l.applicateur===appId&&l.type_attente==='extension');
+    if(attente.length>0){
+      toast(`✓ Règlement extension validé — libération de ${attente.length} lead(s)...`);
+      for(const l of attente){
+        try{
+          const r=await atPost('Leads',{applicateur:l.applicateur,prestation:l.prestation,date:l.date,statut:'transmis'});
+          leads.push({id:r.records[0].id,...r.records[0].fields});
+          await atDelete('Leads_Attente',l.id);
+          leadsAttente=leadsAttente.filter(x=>x.id!==l.id);
+        }catch(e){console.warn('Erreur libération:',e.message);}
+      }
+      toast(`✓ ${attente.length} lead(s) extension libéré(s) et transmis`);
+    }else{
+      toast('✓ Règlement extension validé');
+    }
+  }else{
+    toast('Validation extension annulée');
+  }
+  render();
+}
+
+function showTab(t,btn){
+  document.querySelectorAll('.tab').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  document.getElementById('tab-'+t).classList.add('active');btn.classList.add('active');
+}
+function toggleCatFields(){
+  const v=document.getElementById('a-cat').value;
+  document.getElementById('champs-abonne').style.display=v==='abonne'?'block':'none';
+  document.getElementById('champs-decouverte').style.display=v==='decouverte'?'block':'none';
+}
+
+function getPeriodeBounds(type,now){
+  const y=now.getFullYear(),m=now.getMonth();
+  if(type==='1-31') return{debut:new Date(y,m,1),fin:new Date(y,m+1,0),label:`1–${new Date(y,m+1,0).getDate()} ${MOIS[m]} ${y}`,year:y,month:m};
+  if(now.getDate()>=15) return{debut:new Date(y,m,15),fin:new Date(y,m+1,14),label:`15 ${MOIS[m]} – 14 ${MOIS[(m+1)%12]} ${y}`,year:y,month:m};
+  return{debut:new Date(y,m-1,15),fin:new Date(y,m,14),label:`15 ${MOIS[(m-1+12)%12]} – 14 ${MOIS[m]} ${y}`,year:y,month:m-1<0?11:m-1};
+}
+
+// Logique carnet : état d'un applicateur pour une période
+function carnetState(appId, periodLeads, year, month, typePeriode){
+  const ext=isExtActive(appId,year,month);
+  const count=periodLeads.length;
+  const max=ext?SEUIL_EXT_MAX:SEUIL_MAX;
+  let canAdd=count<max;
+  let facturation='', alerteFactu='', cardClass='';
+  // Seuil d'alerte gratuité selon type période
+  const jourCourant=new Date().getDate();
+  const seuilAlerte=(typePeriode==='15-14')?8:20;
+  const alerteGratuitActive=jourCourant>=seuilAlerte;
+
+  if(count===0){facturation='';cardClass='';}
+  else if(count<SEUIL_MIN){
+    if(alerteGratuitActive){
+      // Double facteur : vérifier la moyenne annuelle
+      const statsAn=getStatsAnnuelles(appId, new Date().getFullYear());
+      const moyenneOK=statsAn.moyenne>=SEUIL_MIN;
+      if(moyenneOK){
+        // Leads mois < 6 MAIS moyenne annuelle >= 6 → facturation normale
+        facturation='normal_moyenne';
+        alerteFactu=`Leads mois : ${count} < 6 — mais moyenne annuelle ${statsAn.moyenne}/mois ≥ 6 → Facturation normale`;
+        cardClass='warn';
+      }else{
+        // Leads mois < 6 ET moyenne annuelle < 6 → GRATUIT
+        facturation='gratuit';
+        alerteFactu=`Mois suivant GRATUIT — ${count} leads < 6 ET moyenne annuelle ${statsAn.moyenne}/mois < 6`;
+        cardClass='urgent';
+      }
+    }else{
+      facturation='attention';
+      cardClass='warn';
+    }
+  }else if(count<=SEUIL_MAX){
+    facturation='normal';cardClass=count>=SEUIL_MAX?'ext':'good';
+  }
+
+  if(ext){
+    const reglExtValide=isReglExtValide(appId,year,month);
+    if(count<=SEUIL_AVANCE){
+      facturation='avance';
+      alerteFactu=`Extension achetée mais ${count} leads ≤ 5 — règlement considéré comme avance sur mois suivant`;
+      cardClass='warn';
+    } else if(count>SEUIL_MAX){
+      facturation='extension';
+      alerteFactu=`Extension carnet 13–20 active — ${count} leads (${count-SEUIL_MAX} en extension)`;
+    }
+    // Blocage leads extension si règlement pas validé
+    if(count>=SEUIL_MAX && !reglExtValide){
+      canAdd=false; // bloquer si extension active mais règlement pas validé
+    }
+  }
+
+  if(count>=SEUIL_MAX&&!ext){
+    alerteFactu=`Plafond 12 leads atteint — extension carnet 13–20 requise pour continuer`;
+    cardClass='ext';
+  }
+
+  return{count,max,canAdd,ext,facturation,alerteFactu,cardClass};
+}
+
+function render(){
+  renderAppSelect();renderAppTable();renderRecent();renderSynthese();
+  renderPeriodeBloc('1-31','bloc-p131');
+  renderPeriodeBloc('15-14','bloc-p1514');
+  renderDecouverte();
+  renderNA();
+  renderAttente();
+  renderTotauxAdherents();
+  renderRattrapageSelects();
+  renderRattrapageHistorique();
+  checkSaisieStatus();
+}
+
+function renderAttente(){
+  const div=document.getElementById('bloc-attente');
+  if(!div)return;
+  if(!leadsAttente.length){
+    div.innerHTML='<span class="aok">✓ Aucun lead en attente — tous les règlements sont à jour.</span>';
+    return;
+  }
+
+  // Grouper par applicateur
+  const parApp={};
+  leadsAttente.forEach(l=>{
+    if(!parApp[l.applicateur])parApp[l.applicateur]=[];
+    parApp[l.applicateur].push(l);
+  });
+
+  // Métriques globales
+  const nAbonnement=leadsAttente.filter(l=>l.type_attente==='abonnement'||!l.type_attente).length;
+  const nExtension=leadsAttente.filter(l=>l.type_attente==='extension').length;
+
+  div.innerHTML=`
+    <div class="grid4" style="margin-bottom:16px">
+      <div class="metric c-pink"><div class="metric-label">Total en attente</div><div class="metric-value">${leadsAttente.length}</div></div>
+      <div class="metric c-red"><div class="metric-label">Défaut abonnement</div><div class="metric-value">${nAbonnement}</div></div>
+      <div class="metric c-orange"><div class="metric-label">Défaut extension</div><div class="metric-value">${nExtension}</div></div>
+      <div class="metric"><div class="metric-label">Applicateurs concernés</div><div class="metric-value">${Object.keys(parApp).length}</div></div>
+    </div>
+    ${Object.entries(parApp).map(([appId,lList])=>{
+      const app=apps.find(a=>a.id===appId);
+      const nom=app?app.nom:appId;
+      const typePeriode=app?app.type_periode||'1-31':'1-31';
+      const rs=app?reglState(appId,typePeriode):{valide:false};
+      return`<div class="card-app urgent" style="margin-bottom:12px">
+        <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px;margin-bottom:12px">
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,#ff6584,#ffa040);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff">${nom.charAt(0)}</div>
+            <div>
+              <strong style="font-size:13px">${nom}</strong>
+              <span class="badge b-stop" style="margin-left:8px">${lList.length} lead(s) bloqué(s)</span>
+              ${app?`<span class="badge b-${app.cat==='abonne'?'abo':'dec'}" style="margin-left:6px">${app.cat==='abonne'?'Abonné':'Découverte'} — ${typePeriode}</span>`:''}
+            </div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            ${rs.valide
+              ?`<span class="aok">✓ Règlement validé</span>`
+              :`<button class="btn btn-sm" style="background:#ff658422;color:#ff8fa3;border-color:#ff658444" onclick="toggleReglement('${appId}',${rs.pbYear},${rs.pbMonth})">🔴 Valider le règlement → libérer les leads</button>`
+            }
+          </div>
+        </div>
+        <table><thead><tr>
+          <th>Date saisie</th><th>Date lead</th><th>Prestation</th><th>Type blocage</th><th></th>
+        </tr></thead><tbody>
+        ${[...lList].sort((a,b)=>new Date(a.date_saisie)-new Date(b.date_saisie)).map(l=>`<tr>
+          <td style="color:var(--muted);font-size:11px">${l.date_saisie||'—'}</td>
+          <td style="color:var(--muted);font-size:11px">${l.date||'—'}</td>
+          <td><span class="badge b-prest">${l.prestation} — ${PRESTS[l.prestation]||l.prestation}</span></td>
+          <td>${l.type_attente==='extension'
+            ?'<span class="badge b-ext">Extension</span>'
+            :'<span class="badge b-stop">Abonnement</span>'}</td>
+          <td><button class="btn btn-sm btn-danger" onclick="deleteAttente('${l.id}')" title="Supprimer">✕</button></td>
+        </tr>`).join('')}
+        </tbody></table>
+        ${app&&app.email_applicateur?`<p style="font-size:11px;color:var(--muted);margin-top:8px">📧 Email envoyé à : ${app.email_applicateur}</p>`:''}
+      </div>`;
+    }).join('')}`;
+}
+
+async function deleteAttente(id){
+  if(!confirm('Supprimer ce lead en attente ?'))return;
+  try{
+    await atDelete('Leads_Attente',id);
+    leadsAttente=leadsAttente.filter(l=>l.id!==id);
+    toast('Lead supprimé');render();
+  }catch(e){toast('Erreur : '+e.message,false);}
+}
+
+function renderRattrapageSelects(){
+  ['ratt-app','ratt-app2'].forEach(id=>{
+    const sel=document.getElementById(id);
+    if(!sel)return;
+    const cur=sel.value;
+    sel.innerHTML='<option value="">— choisir —</option>'+
+      apps.filter(a=>a.cat==='abonne').map(a=>`<option value="${a.id}">${a.nom}</option>`).join('');
+    if(cur)sel.value=cur;
+  });
+  // Générer la grille des mois si pas encore fait
+  const grid=document.getElementById('ratt-mois-grid');
+  if(grid&&grid.children.length===0){
+    const mois=['Janvier','Février','Mars','Avril','Mai','Juin','Juillet','Août','Septembre','Octobre','Novembre','Décembre'];
+    grid.innerHTML=mois.map((m,i)=>`
+      <div style="background:var(--surface);border-radius:8px;padding:8px 10px;border:1px solid var(--border)">
+        <div style="font-size:11px;color:var(--muted);margin-bottom:4px">${m}</div>
+        <input type="number" id="ratt-m-${i}" placeholder="0" min="0" style="padding:4px 6px;font-size:13px">
+      </div>`).join('');
+  }
+}
+
+function renderRattrapageHistorique(){
+  const div=document.getElementById('ratt-historique');
+  if(!div)return;
+  if(!historique.length){div.innerHTML='<p class="loading">Aucun historique enregistré.</p>';return;}
+  // Grouper par applicateur
+  const parApp={};
+  historique.forEach(h=>{
+    if(!parApp[h.applicateur])parApp[h.applicateur]=[];
+    parApp[h.applicateur].push(h);
+  });
+  div.innerHTML='<div style="overflow-x:auto"><table><thead><tr><th>Applicateur</th><th>Année</th><th>Mois</th><th>Nb leads</th><th>Facturation</th><th></th></tr></thead><tbody>'+
+    Object.entries(parApp).map(([appId,hList])=>{
+      const app=apps.find(a=>a.id===appId);
+      return [...hList].sort((a,b)=>a.annee===b.annee?a.mois-b.mois:a.annee-b.annee).map(h=>`<tr>
+        <td><strong>${app?app.nom:appId}</strong></td>
+        <td>${h.annee}</td>
+        <td>${['Jan','Fév','Mar','Avr','Mai','Juin','Juil','Aoû','Sep','Oct','Nov','Déc'][(h.mois||1)-1]}</td>
+        <td style="text-align:center;font-weight:600;color:${(h.nb_leads||0)>=6?'var(--accent3)':'var(--accent2)'}">${h.nb_leads||0}</td>
+        <td><span class="badge ${h.facturation==='gratuit'?'b-stop':h.facturation==='extension'?'b-ext':'b-abo'}">${h.facturation||'normal'}</span></td>
+        <td><button class="btn btn-sm btn-danger" onclick="deleteHistorique('${h.id}')">✕</button></td>
+      </tr>`).join('');
+    }).join('')
+  +'</tbody></table></div>';
+}
+
+async function saveRattrapageTotal(){
+  const appId=document.getElementById('ratt-app').value;
+  const moisDebut=parseInt(document.getElementById('ratt-mois-debut').value);
+  const moisFin=parseInt(document.getElementById('ratt-mois-fin').value);
+  const annee=parseInt(document.getElementById('ratt-annee').value);
+  const total=parseInt(document.getElementById('ratt-total').value)||0;
+  if(!appId){toast('Choisissez un applicateur',false);return;}
+  if(total===0){toast('Saisissez un nombre de leads > 0',false);return;}
+  if(moisFin<moisDebut){toast('Le mois de fin doit être après le mois de début',false);return;}
+  // Recharger l'historique frais depuis Airtable
+  try{const rh=await atGet('Historique');historique=rh.map(r=>({id:r.id,...r.fields}));}catch(e){}
+  const nbMois=moisFin-moisDebut+1;
+  const parMois=Math.floor(total/nbMois);
+  const reste=total-(parMois*nbMois);
+  document.getElementById('ratt-msg')&&(document.getElementById('ratt-msg').textContent='Enregistrement...');
+  let ok=0;
+  for(let m=moisDebut;m<=moisFin;m++){
+    const nb=parMois+(m===moisFin?reste:0);
+    // Vérifier si déjà existant
+    const existe=historique.find(h=>h.applicateur===appId&&h.annee===annee&&h.mois===m+1);
+    if(existe){toast(`Mois ${m+1}/${annee} déjà enregistré — ignoré`,false);continue;}
+    try{
+      const r=await atPost('Historique',{applicateur:appId,annee,mois:m+1,nb_leads:nb,facturation:nb>=6?'normal':'gratuit'});
+      historique.push({id:r.records[0].id,...r.records[0].fields});
+      ok++;
+    }catch(e){console.warn('Erreur historique:',e.message);}
+  }
+  toast(`✓ ${ok} mois enregistrés — ${total} leads répartis sur ${nbMois} mois`);
+  document.getElementById('ratt-total').value='';
+  render();
+}
+
+async function saveRattrapageDetail(){
+  const appId=document.getElementById('ratt-app2').value;
+  const annee=parseInt(document.getElementById('ratt-annee2').value);
+  if(!appId){toast('Choisissez un applicateur',false);return;}
+  document.getElementById('ratt-msg').textContent='Enregistrement...';
+  let ok=0,ignore=0;
+  for(let m=0;m<12;m++){
+    const val=parseInt(document.getElementById('ratt-m-'+m)?.value)||0;
+    if(val===0)continue;
+    const existe=historique.find(h=>h.applicateur===appId&&h.annee===annee&&h.mois===m+1);
+    if(existe){ignore++;continue;}
+    try{
+      const r=await atPost('Historique',{applicateur:appId,annee,mois:m+1,nb_leads:val,facturation:val>=6?'normal':'gratuit'});
+      historique.push({id:r.records[0].id,...r.records[0].fields});
+      ok++;
+    }catch(e){console.warn('Erreur:',e.message);}
+  }
+  document.getElementById('ratt-msg').textContent='';
+  toast(`✓ ${ok} mois enregistrés${ignore>0?` — ${ignore} ignorés (déjà existants)`:''}`);
+  for(let m=0;m<12;m++){const el=document.getElementById('ratt-m-'+m);if(el)el.value='';}
+  render();
+}
+
+async function deleteHistorique(id){
+  if(!confirm('Supprimer cet enregistrement historique ?'))return;
+  try{
+    await atDelete('Historique',id);
+    historique=historique.filter(h=>h.id!==id);
+    toast('Supprimé');renderRattrapageHistorique();
+  }catch(e){toast('Erreur : '+e.message,false);}
+}
+
+function toggleLeadsList(id){
+  const div=document.getElementById(id);
+  if(!div)return;
+  const btn=div.previousElementSibling;
+  if(div.style.display==='none'){
+    div.style.display='block';
+    if(btn)btn.textContent=btn.textContent.replace('Voir','Masquer');
+  }else{
+    div.style.display='none';
+    if(btn)btn.textContent=btn.textContent.replace('Masquer','Voir');
+  }
+}
+
+function renderTotauxAdherents(){
+  const div=document.getElementById('totaux-adherents');
+  if(!div)return;
+  const n131=apps.filter(a=>a.cat==='abonne'&&!a.interne&&(a.type_periode||'1-31')==='1-31').length;
+  const n1514=apps.filter(a=>a.cat==='abonne'&&!a.interne&&a.type_periode==='15-14').length;
+  const nTest=apps.filter(a=>a.cat==='decouverte').length;
+  const total=n131+n1514+nTest;
+  const nAttente=leadsAttente.length;
+  div.innerHTML=`<div class="grid4" style="margin-bottom:${nAttente?'10px':'0'}">
+    <div class="metric c-pink"><div class="metric-label">Total réseau</div><div class="metric-value">${total}</div></div>
+    <div class="metric c-accent"><div class="metric-label">Période 1–31</div><div class="metric-value">${n131}</div></div>
+    <div class="metric c-green"><div class="metric-label">Période 15–14</div><div class="metric-value">${n1514}</div></div>
+    <div class="metric c-orange"><div class="metric-label">Test découverte</div><div class="metric-value">${nTest}</div></div>
+  </div>
+  ${nAttente?`<div style="background:#ff658422;border:1px solid #ff658444;border-radius:8px;padding:10px 14px;font-size:12px;color:#ff8fa3">
+    <strong>📬 ${nAttente} lead(s) en attente de règlement</strong> — ils seront transmis automatiquement à la validation du paiement.
+    <div style="margin-top:8px;display:flex;flex-wrap:wrap;gap:6px">
+      ${[...new Set(leadsAttente.map(l=>l.applicateur))].map(aId=>{
+        const a=apps.find(x=>x.id===aId);
+        const n=leadsAttente.filter(l=>l.applicateur===aId).length;
+        return`<span class="badge b-stop">${a?a.nom:aId} — ${n} lead(s)</span>`;
+      }).join('')}
+    </div>
+  </div>`:''}`;
+}
+
+function checkSaisieStatus(){
+  const appId=document.getElementById('s-app').value;
+  const div=document.getElementById('saisie-status');
+  if(!appId){
+    div.style.display='none';
+    const b=document.getElementById('badge-attente');
+    if(b)b.style.display='none';
+    return;
+  }
+  const app=apps.find(a=>a.id===appId);
+  if(!app||app.cat!=='abonne'){div.style.display='none';return;}
+  const now=new Date();
+  const pb=getPeriodeBounds(app.type_periode||'1-31',now);
+  const pLeads=leads.filter(l=>{if(!l.date)return false;const d=new Date(l.date);return l.applicateur===appId&&d>=pb.debut&&d<=pb.fin;});
+  const st=carnetState(appId,pLeads,pb.year,pb.month,app?.type_periode||'1-31');
+  const rs=reglState(appId,app.type_periode||'1-31');
+  const nAttente=leadsAttente.filter(l=>l.applicateur===appId).length;
+  let html='';
+
+  if(rs.bloque && !rs.valide){
+    // Cas blocage abonnement → lead sera mis en attente
+    html=`<div style="background:#ff658422;border:1px solid #ff658466;border-radius:10px;padding:12px 16px;margin-top:4px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:18px">📬</span>
+        <strong style="color:#ff8fa3;font-size:13px">Règlement abonnement non validé — ${app.nom}</strong>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px">
+        Ce lead ne peut pas être enregistré directement.<br>
+        Il sera <strong style="color:#ff8fa3">stocké en attente</strong> et transmis automatiquement dès validation du règlement.<br>
+        Un email sera envoyé à l'applicateur pour l'informer.
+      </p>
+      ${nAttente>0?`<p style="font-size:11px;color:#ffa040;margin-bottom:10px">⚠ ${nAttente} lead(s) déjà en attente pour cet applicateur.</p>`:''}
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-sm" style="background:#ff658433;color:#ff8fa3;border-color:#ff658466;font-size:12px" onclick="saveLead()">
+          📬 Enregistrer — lead mis en attente automatiquement
+        </button>
+        <span style="font-size:11px;color:var(--muted)">ou validez le règlement dans l'onglet Période</span>
+      </div>
+    </div>`;
+  }else if(st.ext && st.count>=SEUIL_MAX && !isReglExtValide(appId,pb.year,pb.month)){
+    // Cas blocage extension → lead sera mis en attente
+    html=`<div style="background:#ffa04022;border:1px solid #ffa04066;border-radius:10px;padding:12px 16px;margin-top:4px">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:8px">
+        <span style="font-size:18px">📬</span>
+        <strong style="color:#ffa040;font-size:13px">Règlement extension 13–20 non validé — ${app.nom}</strong>
+      </div>
+      <p style="font-size:12px;color:var(--muted);margin-bottom:10px">
+        L'extension est activée mais le règlement n'est pas encore validé.<br>
+        Ce lead (n°${st.count+1}/20) sera <strong style="color:#ffa040">stocké en attente</strong> et transmis automatiquement dès validation.<br>
+        Un email sera envoyé à l'applicateur.
+      </p>
+      ${nAttente>0?`<p style="font-size:11px;color:#ffa040;margin-bottom:10px">⚠ ${nAttente} lead(s) déjà en attente pour cet applicateur.</p>`:''}
+      <div style="display:flex;gap:8px;align-items:center">
+        <button class="btn btn-sm" style="background:#ffa04033;color:#ffa040;border-color:#ffa04066;font-size:12px" onclick="saveLead()">
+          📬 Enregistrer — lead mis en attente automatiquement
+        </button>
+        <span style="font-size:11px;color:var(--muted)">ou validez le règlement extension dans l'onglet Période</span>
+      </div>
+    </div>`;
+  }else if(rs.boutonVisible && !rs.valide){
+    html=`<span class="awarn">⚠ Règlement en attente de validation — l'enregistrement sera bloqué dès le 1er jour de la prochaine période.</span>`;
+  }else if(st.count>=SEUIL_MAX&&!st.ext){
+    html=`<span class="adanger">⛔ Plafond 12 leads atteint — impossible d'enregistrer. Activez l'extension carnet 13–20 dans l'onglet Applicateurs.</span>`;
+  }else if(st.count>=SEUIL_EXT_MAX){
+    html=`<span class="adanger">⛔ Plafond 20 leads atteint — carnet complet pour cette période.</span>`;
+  }else if(st.ext&&st.count>=SEUIL_MAX){
+    html=`<span class="aorange">📒 Extension carnet active — lead ${st.count+1}/20</span>`;
+  }else{
+    html=`<span class="aok">✓ Lead ${st.count+1}/${st.max} — carnet${st.ext?' extension':''} ouvert</span>`;
+    if(rs.valide) html+=` <span class="aok" style="margin-left:6px">✓ Abonnement validé</span>`;
+    if(nAttente>0) html+=` <span class="awarn" style="margin-left:6px">📬 ${nAttente} lead(s) en attente de règlement</span>`;
+  }
+  const badge=document.getElementById('badge-attente');
+  if(badge){
+    const showBadge=(rs.bloque&&!rs.valide)||(st.ext&&st.count>=SEUIL_MAX&&!isReglExtValide(appId,pb.year,pb.month));
+    badge.style.display=showBadge?'inline-block':'none';
+    if(st.ext&&st.count>=SEUIL_MAX&&!isReglExtValide(appId,pb.year,pb.month)){
+      badge.style.background='#ffa04022';badge.style.color='#ffa040';badge.style.borderColor='#ffa04044';
+      badge.textContent='📬 Lead stocké en attente — règlement extension';
+    }else{
+      badge.style.background='#ff658422';badge.style.color='#ff8fa3';badge.style.borderColor='#ff658444';
+      badge.textContent='📬 Lead stocké en attente de règlement';
+    }
+  }
+  div.innerHTML=html;div.style.display='block';
+}
+
+let comboItems={}; // {comboId: [{id,label}]}
+
+function renderAppSelect(){
+  comboItems['s-app']=apps.filter(a=>a.cat!=='stop').map(a=>({id:a.id,label:a.nom||''}));
+  comboItems['s-prest']=Object.entries(PRESTS).map(([k,v])=>({id:k,label:`${k} — ${v}`}));
+  // Remplir le select na-prest
+  const naPrest=document.getElementById('na-prest');
+  if(naPrest&&naPrest.options.length<=1){
+    naPrest.innerHTML='<option value="">— choisir —</option>'+
+      Object.entries(PRESTS).map(([k,v])=>`<option value="${k}">${k} — ${v}</option>`).join('');
+  }
+  // Si valeur sélectionnée n'existe plus, vider
+  const curApp=document.getElementById('s-app').value;
+  if(curApp&&!comboItems['s-app'].find(i=>i.id===curApp)){
+    document.getElementById('s-app').value='';
+    document.getElementById('s-app-search').value='';
+  }
+}
+
+function renderComboList(comboId){
+  const list=document.getElementById(comboId+'-list');
+  const search=document.getElementById(comboId+'-search');
+  const q=(search.value||'').toLowerCase().trim();
+  const items=(comboItems[comboId]||[]);
+  const filtered=q?items.filter(i=>i.label.toLowerCase().includes(q)):items;
+  if(!filtered.length){
+    list.innerHTML='<div class="combo-item empty">Aucun résultat</div>';
+    return;
+  }
+  list.innerHTML=filtered.map(i=>`<div class="combo-item" onclick="selectCombo('${comboId}','${i.id}')">${i.label}</div>`).join('');
+}
+
+function openCombo(comboId){
+  document.querySelectorAll('.combo-list').forEach(el=>el.classList.remove('open'));
+  renderComboList(comboId);
+  document.getElementById(comboId+'-list').classList.add('open');
+}
+
+function filterCombo(comboId){
+  renderComboList(comboId);
+  document.getElementById(comboId+'-list').classList.add('open');
+  // Si le texte ne correspond plus exactement, vider la sélection
+  const search=document.getElementById(comboId+'-search');
+  const hidden=document.getElementById(comboId);
+  const items=comboItems[comboId]||[];
+  const match=items.find(i=>i.label===search.value);
+  hidden.value=match?match.id:'';
+  if(comboId==='s-app')checkSaisieStatus();
+}
+
+function selectCombo(comboId,id){
+  const items=comboItems[comboId]||[];
+  const item=items.find(i=>i.id===id);
+  if(!item)return;
+  document.getElementById(comboId+'-search').value=item.label;
+  document.getElementById(comboId).value=item.id;
+  document.getElementById(comboId+'-list').classList.remove('open');
+  if(comboId==='s-app')checkSaisieStatus();
+}
+
+// Fermer les listes en cliquant ailleurs
+document.addEventListener('click',function(e){
+  if(!e.target.closest('.combo')){
+    document.querySelectorAll('.combo-list').forEach(el=>el.classList.remove('open'));
+  }
+});
+
+function renderAppTable(){
+  const tb=document.getElementById('app-body');
+  if(!apps.length){tb.innerHTML='<tr><td colspan="8" class="loading">Aucun applicateur.</td></tr>';return;}
+  const now=new Date();
+  const year=now.getFullYear();
+  tb.innerHTML=apps.map(a=>{
+    let extCell='—', reglCell='—', statsHTML='';
+    if(a.cat==='abonne'){
+      const pb=getPeriodeBounds(a.type_periode||'1-31',now);
+      const active=isExtActive(a.id,pb.year,pb.month);
+      const rs=reglState(a.id,a.type_periode||'1-31');
+      extCell=`<button class="btn btn-sm ${active?'btn-orange':'btn-purple'}" onclick="toggleExt('${a.id}',${pb.year},${pb.month})">
+        ${active?'✓ Active — désactiver':'＋ Activer extension'}
+      </button>`;
+      // Bouton règlement
+      if(rs.valide){
+        reglCell=`<button class="btn btn-sm btn-green" onclick="toggleReglement('${a.id}',${rs.pbYear},${rs.pbMonth})">✓ Abonnement validé</button>`;
+      }else if(rs.boutonVisible){
+        reglCell=`<button class="btn btn-sm" style="background:#ff658422;color:#ff8fa3;border-color:#ff658444" onclick="toggleReglement('${a.id}',${rs.pbYear},${rs.pbMonth})">🔴 Règlement requis</button>`;
+      }else{
+        reglCell=`<span style="font-size:11px;color:var(--muted)">—</span>`;
+      }
+      // Stats annuelles
+      const stats=getStatsAnnuelles(a.id, year);
+      const couleur=stats.moyenne>=6?'#43e97b':'#ff6584';
+      const icone=stats.moyenne>=6?'✓':'⚠';
+      statsHTML=`<div style="margin-top:6px;padding:6px 10px;background:var(--surface);border-radius:6px;border-left:3px solid ${couleur}">
+        <span style="font-size:11px;color:var(--muted)">Cumul ${year} : </span>
+        <strong style="color:${couleur}">${stats.cumul} leads</strong>
+        <span style="font-size:11px;color:var(--muted);margin-left:8px">Moy. : </span>
+        <strong style="color:${couleur}">${icone} ${stats.moyenne}/mois</strong>
+        <span style="font-size:10px;color:var(--muted);margin-left:6px">(sur ${stats.nbMoisCalc} mois${stats.inclureMoisCourant?' incl. mois en cours':''})</span>
+      </div>`;
+    }
+    return`<tr>
+      <td>
+        <strong>${a.nom||''}</strong>
+        ${statsHTML}
+      </td>
+      <td><span class="badge b-${a.cat==='abonne'?'abo':a.cat==='decouverte'?'dec':'stop'}">${a.cat==='abonne'?'Abonné':a.cat==='decouverte'?'Découverte':'Stop'}</span>${a.interne?'<span class="badge" style="background:#ffffff22;color:#aaa;border:1px solid #ffffff22;margin-left:4px">Interne</span>':''}</td>
+      <td style="color:var(--muted);font-size:11px">${a.cat==='abonne'?(a.type_periode||'—'):a.cat==='decouverte'?('fin : '+finTest(a.debut_test)):'—'}</td>
+      <td>${a.objectif||6}</td>
+      <td>${reglCell}</td>
+      <td>${extCell}</td>
+      <td style="font-size:11px;color:var(--muted)">${a.telephone||'—'}</td>
+      <td>
+        <button class="btn btn-sm btn-purple" onclick="editApp('${a.id}')" title="Modifier">✏️</button>
+        <button class="btn btn-sm btn-danger" onclick="delApp('${a.id}')" title="Supprimer">✕</button>
+      </td>
+    </tr>`;
+  }).join('');
+}
+
+function finTest(d){if(!d)return'—';const dt=new Date(d);dt.setDate(dt.getDate()+60);return dt.toLocaleDateString('fr-FR');}
+function joursRestantsTest(d){if(!d)return null;const f=new Date(d);f.setDate(f.getDate()+60);return Math.round((f-new Date())/86400000);}
+
+function prestOptionsHTML(selected){
+  return Object.entries(PRESTS).map(([k,v])=>`<option value="${k}" ${k===selected?'selected':''}>${k} — ${v}</option>`).join('');
+}
+
+function renderRecent(){
+  const div=document.getElementById('recent-leads');
+  const rec=[...leads].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,30);
+  if(!rec.length){div.innerHTML='<p class="loading">Aucun lead.</p>';return;}
+  div.innerHTML='<table><thead><tr><th>Date</th><th>Applicateur</th><th>Prestation</th><th>Statut</th><th></th></tr></thead><tbody>'+
+    rec.map(l=>{
+      const a=apps.find(x=>x.id===l.applicateur);
+      const refuse=l.statut==='refuse';
+      const statutBadge=refuse
+        ?'<span class="badge" style="background:#ffa04022;color:#ffa040;border:1px solid #ffa04044">⚠ Refusé</span>'
+        :'<span class="badge" style="background:#43e97b22;color:#43e97b;border:1px solid #43e97b44">✓ Transmis</span>';
+      const refuseBtn=refuse
+        ?`<button class="btn btn-sm btn-green" onclick="toggleRefus('${l.id}',false)" title="Marquer transmis">↩ Rétablir</button>`
+        :`<button class="btn btn-sm btn-orange" onclick="toggleRefus('${l.id}',true)" title="Marquer refusé">⚠ Refusé</button>`;
+      return`<tr id="lead-row-${l.id}" style="${refuse?'opacity:.7':''}">
+        <td style="color:var(--muted)">${l.date||''}</td>
+        <td><strong>${a?a.nom:'—'}</strong></td>
+        <td><span class="badge b-prest" style="${refuse?'text-decoration:line-through;opacity:.6':''}">${l.prestation} — ${PRESTS[l.prestation]||l.prestation}</span></td>
+        <td>${statutBadge}</td>
+        <td style="white-space:nowrap">
+          ${refuseBtn}
+          <button class="btn btn-sm btn-purple" onclick="editLead('${l.id}')" title="Modifier">✏️</button>
+          <button class="btn btn-sm btn-danger" onclick="deleteLead('${l.id}')" title="Supprimer">✕</button>
+        </td>
+      </tr>
+      <tr id="lead-edit-${l.id}" style="display:none">
+        <td colspan="5">
+          <div class="contact-form" style="margin:0">
+            <div class="row">
+              <div class="col" style="max-width:160px"><label>Date</label><input type="date" id="led-date-${l.id}" value="${l.date||''}"></div>
+              <div class="col"><label>Prestation</label><select id="led-prest-${l.id}">${prestOptionsHTML(l.prestation)}</select></div>
+            </div>
+            <div style="margin-top:10px;display:flex;gap:8px">
+              <button class="btn btn-primary btn-sm" onclick="saveEditLead('${l.id}')">✓ Enregistrer</button>
+              <button class="btn btn-sm" onclick="closeEditLead('${l.id}')">Annuler</button>
+            </div>
+          </div>
+        </td>
+      </tr>`;
+    }).join('')+'</tbody></table>';
+}
+
+function renderSynthese(){
+  const now=new Date(),y=now.getFullYear(),m=now.getMonth();
+  const lAn=leads.filter(l=>l.date&&new Date(l.date).getFullYear()===y);
+  const lMois=leads.filter(l=>{if(!l.date)return false;const d=new Date(l.date);return d.getFullYear()===y&&d.getMonth()===m;});
+  const hAn=historique.filter(h=>h.annee===y).reduce((sum,h)=>sum+(h.nb_leads||0),0);
+  const totalAn=lAn.length+hAn;
+  document.getElementById('m-mois').textContent=lMois.length;
+  document.getElementById('m-an').textContent=totalAn;
+  document.getElementById('m-abo').textContent=apps.filter(a=>a.cat==='abonne').length;
+  document.getElementById('m-tests').textContent=apps.filter(a=>a.cat==='decouverte').length;
+  let extCount=0;
+  apps.filter(a=>a.cat==='abonne'&&!a.interne).forEach(a=>{
+    const pb=getPeriodeBounds(a.type_periode||'1-31',now);
+    if(isExtActive(a.id,pb.year,pb.month))extCount++;
+  });
+  document.getElementById('m-ext').textContent=extCount;
+
+  let ah='', rows='';
+
+  // Fonction pour traiter un applicateur abonné
+  const processAbonne=(app)=>{
+    const pb=getPeriodeBounds(app.type_periode||'1-31',now);
+    const pLeads=leads.filter(l=>{if(!l.date)return false;const d=new Date(l.date);return l.applicateur===app.id&&d>=pb.debut&&d<=pb.fin;});
+    const ytdLeads=lAn.filter(l=>l.applicateur===app.id).length;
+    const ytdHisto=historique.filter(h=>h.applicateur===app.id&&h.annee===y).reduce((s,h)=>s+(h.nb_leads||0),0);
+    const ytd=ytdLeads+ytdHisto;
+    const st=carnetState(app.id,pLeads,pb.year,pb.month,app.type_periode||'1-31');
+    let carnetBadge='';
+    if(st.facturation==='gratuit') carnetBadge='<span class="badge b-gratuit">Mois suivant GRATUIT</span>';
+    else if(st.facturation==='avance') carnetBadge='<span class="badge b-avance">Avance mois suivant</span>';
+    else if(st.facturation==='extension') carnetBadge='<span class="badge b-ext">Extension active</span>';
+    else if(st.count>=SEUIL_MAX&&!st.ext) carnetBadge='<span class="badge b-ext">Plafond atteint</span>';
+    let factHTML='';
+    if(st.alerteFactu){
+      const cls=st.facturation==='gratuit'||st.facturation==='avance'?'adanger':st.facturation==='extension'?'aorange':'awarn';
+      factHTML=`<span class="${cls}" style="font-size:11px">${st.alerteFactu}</span>`;
+      // Dans la synthèse : n'afficher que les alertes rouges aux dates seuils
+      const typePer=app.type_periode||'1-31';
+      const jour=now.getDate();
+      let alerteRougeVisible=false;
+      if(typePer==='1-31'){
+        // Alerte à partir du 25 du mois
+        alerteRougeVisible=jour>=25;
+      }else{
+        // Période 15-14 : alerte à partir du 8 du mois M+1
+        // On est dans la période si jour >= 15 (période en cours du mois)
+        // ou si jour < 15 (on est dans la fin de période, 1-14 du mois suivant)
+        // L'alerte doit apparaître quand on est entre le 8 et le 14 du mois M+1
+        alerteRougeVisible=jour>=8&&jour<=14;
+      }
+      if((st.facturation==='gratuit'||st.facturation==='avance')&&alerteRougeVisible){
+        const dept=(app.nom||'').match(/^\d+/)?app.nom.match(/^\d+/)[0]:'—';
+        ah+=`<div class="adanger alert-block" style="border-left-color:#ff6584;display:flex;align-items:center;justify-content:space-between">
+          <span><strong>${app.nom}</strong> — ${st.alerteFactu}</span>
+          <button class="btn btn-sm" style="background:#1877f222;color:#1877f2;border-color:#1877f244;margin-left:8px;white-space:nowrap" onclick="boostFacebook('${app.nom}','${dept}',${st.count},'Rouge — Gratuité')">📣 Boost Facebook</button>
+        </div>`;
+      }
+    }else factHTML='<span class="aok">✓ Normal</span>';
+    const extBadge=st.ext?'<span class="badge b-ext" style="margin-left:4px">13–20</span>':'';
+    return`<tr>
+      <td><strong>${app.nom}</strong>${app.interne?'<span class="badge" style="background:#ffffff22;color:#aaa;border:1px solid #ffffff22;margin-left:4px;font-size:9px">Interne</span>':''}</td>
+      <td><span class="badge b-abo">Abonné</span></td>
+      <td style="text-align:center;font-weight:700;color:${st.count<SEUIL_MIN&&st.count>0?'#ff6584':st.count>=SEUIL_MAX?'#ffa040':'#43e97b'}">${st.count}${extBadge}</td>
+      <td>${carnetBadge||'<span style="color:var(--muted);font-size:11px">—</span>'}</td>
+      <td>${st.ext?`<span class="badge b-ext">Active (${st.count>SEUIL_MAX?st.count-SEUIL_MAX:0}/8)</span>`:'<span style="color:var(--muted);font-size:11px">Non activée</span>'}</td>
+      <td style="text-align:center">${ytd}</td>
+      <td>${factHTML}</td>
+    </tr>`;
+  };
+
+  // Groupe 1-31
+  const g131=apps.filter(a=>a.cat==='abonne'&&(a.type_periode||'1-31')==='1-31');
+  // Groupe 15-14
+  const g1514=apps.filter(a=>a.cat==='abonne'&&a.type_periode==='15-14');
+  // Groupe test découverte
+  const gDec=apps.filter(a=>a.cat==='decouverte');
+
+  // Séparateurs de catégorie
+  const sepRow=(label,badge)=>`<tr style="background:var(--surface2)"><td colspan="7" style="padding:8px 12px;font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px">${badge} ${label}</td></tr>`;
+
+  // Construire les alertes par groupe
+  let ah131='', ah1514='', ahDec='';
+
+  if(g131.length){
+    rows+=sepRow('Période 1 – 31','📅');
+    g131.forEach(app=>{
+      const old_ah=ah;
+      rows+=processAbonne(app);
+      if(ah!==old_ah){
+        const newPart=ah.slice(old_ah.length);
+        ah=old_ah;
+        ah131+=newPart;
+      }
+    });
+  }
+  if(g1514.length){
+    rows+=sepRow('Période 15 – 14','📅');
+    g1514.forEach(app=>{
+      const old_ah=ah;
+      rows+=processAbonne(app);
+      if(ah!==old_ah){
+        const newPart=ah.slice(old_ah.length);
+        ah=old_ah;
+        ah1514+=newPart;
+      }
+    });
+  }
+  if(gDec.length){
+    rows+=sepRow('Tests découverte','⭐');
+    gDec.forEach(app=>{
+      const jr=joursRestantsTest(app.debut_test);
+      const lApp=leads.filter(l=>l.applicateur===app.id);
+      const ytdD=lAn.filter(l=>l.applicateur===app.id).length;
+      let al='',blk='';
+      if(jr===null)al='—';
+      else if(jr<0){al=`<span class="adanger">Expiré</span>`;blk=`<div class="adanger alert-block" style="border-left-color:#ff6584"><strong>${app.nom}</strong> — test expiré depuis ${Math.abs(jr)} j</div>`;}
+      else if(jr<=7){al=`<span class="adanger">Fin dans ${jr}j</span>`;blk=`<div class="adanger alert-block" style="border-left-color:#ff6584"><strong>${app.nom}</strong> — 🔴 fin dans ${jr} j — relance J-7</div>`;}
+      else if(jr<=15){al=`<span class="awarn">Fin dans ${jr}j</span>`;}
+      else if(jr<=30){al=`<span class="apurple">Fin dans ${jr}j</span>`;}
+      else al=`<span class="aok">En cours (${jr}j)</span>`;
+      ahDec+=blk;
+      rows+=`<tr><td><strong>${app.nom}</strong></td><td><span class="badge b-dec">Découverte</span></td><td style="text-align:center">${lApp.length}</td><td>—</td><td>—</td><td style="text-align:center">${ytdD}</td><td>${al}</td></tr>`;
+    });
+  }
+
+
+  // Construire alertes groupées avec section orange séparée
+  // Variables pour les alertes orange (départements à surveiller)
+  let orange131='', orange1514='', orangeDec='';
+
+  // Extraire les oranges de processAbonne — on reprocesse pour récupérer les oranges
+  const getOranges=(appList)=>{
+    let oranges='';
+    appList.forEach(app=>{
+      const pb=getPeriodeBounds(app.type_periode||'1-31',now);
+      const pLeads=leads.filter(l=>{if(!l.date)return false;const d=new Date(l.date);return l.applicateur===app.id&&d>=pb.debut&&d<=pb.fin;});
+      const st=carnetState(app.id,pLeads,pb.year,pb.month,app.type_periode||'1-31');
+      const stats=getStatsAnnuelles(app.id,y);
+      const dept=(app.nom||'').match(/^\d+/)?app.nom.match(/^\d+/)[0]:'—';
+      const boostBtn=`<button class="btn btn-sm" style="background:#1877f222;color:#1877f2;border-color:#1877f244;margin-left:8px;white-space:nowrap" onclick="boostFacebook('${app.nom}','${dept}',${st.count},'Orange')">📣 Boost Facebook</button>`;
+      if(st.facturation==='normal_moyenne'){
+        oranges+=`<div class="awarn alert-block" style="border-left-color:#ffa040;display:flex;align-items:center;justify-content:space-between">
+          <span>🟠 <strong>${app.nom}</strong> — ${st.count} lead${st.count>1?'s':''} ce mois (< 6) — moyenne annuelle ${stats.moyenne}/mois ≥ 6 → surveiller</span>${boostBtn}
+        </div>`;
+      } else if(st.facturation==='attention'||(st.count<SEUIL_MIN&&st.count>0&&st.facturation!=='gratuit')){
+        oranges+=`<div class="awarn alert-block" style="border-left-color:#ffa040;display:flex;align-items:center;justify-content:space-between">
+          <span>🟠 <strong>${app.nom}</strong> — ${st.count} lead${st.count>1?'s':''} ce mois — risque gratuité si < 6 en fin de période</span>${boostBtn}
+        </div>`;
+      }
+    });
+    return oranges;
+  };
+
+  orange131=getOranges(g131);
+  orange1514=getOranges(g1514);
+
+  // Construire le HTML final
+  let ahHTML='';
+
+  // Section 1-31
+  if(ah131||orange131){
+    ahHTML+=`<div style="margin-bottom:14px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📅 Période 1–31</div>
+      ${ah131||''}
+      ${orange131?`<div style="margin-top:8px">
+        <div style="font-size:11px;font-weight:500;color:#ffa040;margin-bottom:4px">🟠 Départements à surveiller</div>
+        ${orange131}
+      </div>`:''}
+    </div>`;
+  }
+
+  // Section 15-14
+  if(ah1514||orange1514){
+    ahHTML+=`<div style="margin-bottom:14px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">📅 Période 15–14</div>
+      ${ah1514||''}
+      ${orange1514?`<div style="margin-top:8px">
+        <div style="font-size:11px;font-weight:500;color:#ffa040;margin-bottom:4px">🟠 Départements à surveiller</div>
+        ${orange1514}
+      </div>`:''}
+    </div>`;
+  }
+
+  // Section test découverte
+  if(ahDec){
+    ahHTML+=`<div style="margin-bottom:14px">
+      <div style="font-size:11px;font-weight:600;color:var(--muted);text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px">⭐ Tests découverte</div>
+      ${ahDec}
+    </div>`;
+  }
+
+  document.getElementById('alertes-zone').innerHTML=ahHTML||'<span class="aok">✓ Aucune alerte — tous les applicateurs sont en bonne trajectoire.</span>';
+  document.getElementById('synth-body').innerHTML=rows||'<tr><td colspan="7" class="loading">Aucun applicateur.</td></tr>';
+}
+
+function dotsHTML(count,max,ext,pLeads){
+  let h='<div class="monthly-counter">';
+  for(let i=0;i<SEUIL_MAX;i++){
+    if(i<(pLeads?pLeads.length:count)){
+      const lead=pLeads?pLeads[i]:null;
+      const refuse=lead&&lead.statut==='refuse';
+      h+=`<div class="lead-dot ${refuse?'ext-filled':'filled'}" title="Lead ${i+1}${refuse?' — Refusé':''}"></div>`;
+    }else{
+      h+=`<div class="lead-dot" title="Lead ${i+1}"></div>`;
+    }
+  }
+  if(ext){
+    for(let i=SEUIL_MAX;i<SEUIL_EXT_MAX;i++){
+      h+=`<div class="lead-dot ${i<count?'ext-filled':'limit'}" title="Extension lead ${i+1}"></div>`;
+    }
+  }
+  h+='</div>';return h;
+}
+
+function renderPeriodeBloc(type,divId){
+  const div=document.getElementById(divId);
+  const now=new Date(),y=now.getFullYear();
+  const lAn=leads.filter(l=>l.date&&new Date(l.date).getFullYear()===y);
+  const list=apps.filter(a=>a.cat==='abonne'&&!a.interne&&(a.type_periode||'1-31')===type);
+  if(!list.length){div.innerHTML='<p class="loading">Aucun abonné pour cette période.</p>';return;}
+  const pb0=getPeriodeBounds(type,now);
+  const totalLeadsPeriode=leads.filter(l=>{if(!l.date)return false;const d=new Date(l.date);return list.find(a=>a.id===l.applicateur)&&d>=pb0.debut&&d<=pb0.fin;}).length;
+  const headerHTML=`<div style="display:flex;gap:10px;margin-bottom:16px;flex-wrap:wrap">
+    <div class="metric c-accent" style="min-width:120px;padding:10px 16px"><div class="metric-label">Adhérents</div><div class="metric-value">${list.length}</div></div>
+    <div class="metric c-green" style="min-width:120px;padding:10px 16px"><div class="metric-label">Leads période</div><div class="metric-value">${totalLeadsPeriode}</div></div>
+    <div class="metric" style="min-width:120px;padding:10px 16px"><div class="metric-label">Moy. leads/adhérent</div><div class="metric-value">${list.length>0?Math.round(totalLeadsPeriode/list.length*10)/10:0}</div></div>
+    <div class="metric c-orange" style="min-width:120px;padding:10px 16px"><div class="metric-label">Période</div><div class="metric-value" style="font-size:13px;padding-top:4px">${pb0.label}</div></div>
+  </div>`;
+  div.innerHTML=headerHTML+list.map(app=>{
+    const pb=getPeriodeBounds(type,now);
+    const pLeads=leads.filter(l=>{if(!l.date)return false;const d=new Date(l.date);return l.applicateur===app.id&&d>=pb.debut&&d<=pb.fin;});
+    const jr=Math.round((pb.fin-now)/86400000);
+    const ytdLeads=lAn.filter(l=>l.applicateur===app.id).length;
+    const ytdHisto=historique.filter(h=>h.applicateur===app.id&&h.annee===y).reduce((s,h)=>s+(h.nb_leads||0),0);
+    const ytd=ytdLeads+ytdHisto;
+    const st=carnetState(app.id,pLeads,pb.year,pb.month,app.type_periode||'1-31');
+    const pct=Math.round(st.count/SEUIL_MAX*100);
+    const pctExt=st.ext&&st.count>SEUIL_MAX?Math.round((st.count-SEUIL_MAX)/8*100):0;
+
+    let alerte='';
+    if(st.facturation==='gratuit') alerte=`<span class="adanger">🔴 Mois suivant GRATUIT — ${st.count} leads < 6 ET moyenne annuelle < 6</span>`;
+    else if(st.facturation==='normal_moyenne') alerte=`<span class="awarn">⚠ ${st.count} leads < 6 — mais moyenne annuelle ≥ 6 → Facturation normale</span>`;
+    else if(st.facturation==='avance') alerte=`<span class="adanger">🟣 Avance sur mois suivant — extension < 5 leads</span>`;
+    else if(st.facturation==='extension') alerte=`<span class="aorange">📒 Extension 13–20 active — ${st.count} leads</span>`;
+    else if(st.count>=SEUIL_MAX&&!st.ext) alerte=`<span class="awarn">⛔ Plafond 12 atteint — activer extension pour continuer</span>`;
+    else if(st.count>=SEUIL_MIN) alerte=`<span class="aok">✓ Facturation normale (${st.count} leads)</span>`;
+    else if(st.count>0) alerte=`<span style="color:var(--muted);font-size:11px">${st.count} lead${st.count>1?'s':''} enregistré${st.count>1?'s':''}</span>`;
+    else alerte=`<span style="color:var(--muted);font-size:11px">Aucun lead cette période</span>`;
+
+    const byP=pLeads.reduce((a,l)=>{a[l.prestation]=(a[l.prestation]||0)+1;return a;},{});
+    const ph=Object.entries(byP).map(([k,v])=>`<span class="badge b-prest" style="margin-right:4px">${k}×${v}</span>`).join('')||'<span style="font-size:11px;color:var(--muted)">—</span>';
+
+    return`<div class="card-app ${st.cardClass}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <strong style="font-size:13px">${app.nom}</strong>
+          ${st.ext?'<span class="badge b-ext">Extension 13–20</span>':''}
+        </div>
+        <div style="display:flex;align-items:center;gap:8px;flex-wrap:wrap">
+          ${(()=>{
+            const rs=reglState(app.id,app.type_periode||'1-31');
+            if(rs.valide){
+              return`<button class="btn btn-sm btn-green" onclick="toggleReglement('${app.id}',${rs.pbYear},${rs.pbMonth})" title="Règlement validé — cliquer pour annuler">✓ Abonnement validé</button>`;
+            } else if(rs.boutonVisible){
+              return`<button class="btn btn-sm" style="background:#ff658422;color:#ff8fa3;border-color:#ff658444" onclick="toggleReglement('${app.id}',${rs.pbYear},${rs.pbMonth})" title="Valider le règlement">🔴 Règlement requis</button>`;
+            } return '';
+          })()}
+          <button class="btn btn-sm ${st.ext?'btn-orange':'btn-purple'}" onclick="toggleExt('${app.id}',${pb.year},${pb.month})" title="${st.ext?'Désactiver extension':'Activer extension carnet 13–20'}">
+            ${st.ext?'📒 Désactiver ext.':'📒 Activer ext. 13–20'}
+          </button>
+          ${st.ext?(()=>{
+            const reglExtValide=isReglExtValide(app.id,pb.year,pb.month);
+            if(reglExtValide){
+              return`<button class="btn btn-sm btn-green" onclick="validerReglExt('${app.id}',${pb.year},${pb.month})" title="Règlement extension validé">✓ Règl. ext. validé</button>`;
+            }else{
+              const nAttExt=leadsAttente.filter(l=>l.applicateur===app.id&&l.type_attente==='extension').length;
+              return`<button class="btn btn-sm" style="background:#ffa04022;color:#ffa040;border-color:#ffa04044" onclick="validerReglExt('${app.id}',${pb.year},${pb.month})" title="Valider règlement extension">🟠 Règl. ext. requis${nAttExt>0?` (${nAttExt} en attente)`:''}</button>`;
+            }
+          })():''}
+          <span style="font-size:11px;color:var(--muted)">${pb.label} — <strong style="color:var(--text)">${jr}</strong>j restants</span>
+        </div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap">
+        <div class="metric" style="min-width:90px;padding:10px 12px">
+          <div class="metric-label">Leads période</div>
+          <div class="metric-value" style="font-size:22px;color:${st.count<SEUIL_MIN&&st.count>0?'var(--accent2)':st.count>=SEUIL_MAX?'var(--orange)':'var(--accent)'}">${st.count}</div>
+          <div style="font-size:10px;color:var(--muted);margin-top:2px">/${st.max}</div>
+        </div>
+        <div class="metric" style="min-width:90px;padding:10px 12px"><div class="metric-label">Min facturation</div><div class="metric-value" style="font-size:22px;color:var(--accent3)">${SEUIL_MIN}</div></div>
+        <div class="metric" style="min-width:90px;padding:10px 12px"><div class="metric-label">YTD</div><div class="metric-value" style="font-size:22px">${ytd}</div></div>
+        ${(()=>{
+          const stats=getStatsAnnuelles(app.id, y);
+          const couleur=stats.moyenne>=6?'var(--accent3)':'var(--accent2)';
+          const icone=stats.moyenne>=6?'✓':'⚠';
+          return`<div class="metric" style="min-width:90px;padding:10px 12px;border-color:${couleur}44">
+            <div class="metric-label">Moy. annuelle</div>
+            <div class="metric-value" style="font-size:20px;color:${couleur}">${icone} ${stats.moyenne}</div>
+            <div style="font-size:10px;color:var(--muted);margin-top:2px">/mois (${stats.nbMoisCalc} mois)</div>
+          </div>`;
+        })()}
+        <div style="flex:1;min-width:180px">
+          ${alerte}
+          ${dotsHTML(st.count,st.max,st.ext,pLeads)}
+          <div style="margin-top:8px">${ph}</div>
+        </div>
+      </div>
+      ${pLeads.length>0?`
+      <div style="margin-top:10px">
+        <button class="btn btn-sm btn-purple" onclick="toggleLeadsList('leads-${app.id}')">📋 Voir les leads (${pLeads.length})</button>
+        <div id="leads-${app.id}" style="display:none;margin-top:8px">
+          <table style="font-size:12px"><thead><tr><th>Date</th><th>Prestation</th><th>Statut</th><th></th></tr></thead><tbody>
+          ${[...pLeads].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(l=>`<tr>
+            <td style="color:var(--muted)">${l.date||'—'}</td>
+            <td><span class="badge b-prest">${l.prestation} — ${PRESTS[l.prestation]||l.prestation}</span></td>
+            <td>${l.statut==='refuse'
+              ?'<span class="badge" style="background:#ffa04022;color:#ffa040;border:1px solid #ffa04044">⚠ Refusé</span>'
+              :'<span class="badge" style="background:#43e97b22;color:#43e97b;border:1px solid #43e97b44">✓ Transmis</span>'}</td>
+            <td>${l.statut==='refuse'
+              ?`<button class="btn btn-sm btn-green" onclick="toggleRefus('${l.id}',false)">↩ Rétablir</button>`
+              :`<button class="btn btn-sm btn-orange" onclick="toggleRefus('${l.id}',true)">⚠ Refusé</button>`}
+            <button class="btn btn-sm btn-danger" onclick="deleteLead('${l.id}')" style="margin-left:4px">✕</button></td>
+          </tr>`).join('')}
+          </tbody></table>
+        </div>
+      </div>`:''}
+      ${(()=>{
+        const attente=leadsAttente.filter(l=>l.applicateur===app.id);
+        if(!attente.length)return'';
+        return`<div style="margin-top:10px;background:#ff658422;border:1px solid #ff658444;border-radius:8px;padding:10px 14px">
+          <p style="font-size:12px;font-weight:600;color:#ff8fa3;margin-bottom:6px">📬 ${attente.length} lead(s) en attente de règlement</p>
+          <table style="font-size:11px"><thead><tr><th>Date saisie</th><th>Prestation</th><th>Date lead</th></tr></thead><tbody>
+          ${attente.map(l=>`<tr>
+            <td style="color:var(--muted)">${l.date_saisie||'—'}</td>
+            <td><span class="badge b-prest">${l.prestation} — ${PRESTS[l.prestation]||l.prestation}</span></td>
+            <td style="color:var(--muted)">${l.date||'—'}</td>
+          </tr>`).join('')}
+          </tbody></table>
+          <p style="font-size:11px;color:var(--muted);margin-top:6px">Ces leads seront transmis automatiquement dès validation du règlement.</p>
+        </div>`;
+      })()}
+    </div>`;
+  }).join('');
+}
+
+function renderDecouverte(){
+  const div=document.getElementById('bloc-decouverte');
+  const now=new Date();
+  const list=apps.filter(a=>a.cat==='decouverte');
+  if(!list.length){div.innerHTML='<p class="loading">Aucun test découverte.</p>';return;}
+  div.innerHTML=list.map(app=>{
+    const jr=joursRestantsTest(app.debut_test);
+    const lApp=leads.filter(l=>l.applicateur===app.id);
+    const jLog=journalData.filter(j=>j.applicateur===app.id);
+    const finD=app.debut_test?(()=>{const d=new Date(app.debut_test);d.setDate(d.getDate()+60);return d.toLocaleDateString('fr-FR');})():'—';
+    let urgClass='',alerteHTML='';
+    if(jr===null) alerteHTML='<span style="color:var(--muted);font-size:11px">Date début non définie</span>';
+    else if(jr<0){urgClass='urgent';alerteHTML=`<span class="adanger">✕ Expiré depuis ${Math.abs(jr)} j — décision requise</span>`;}
+    else if(jr<=7){urgClass='urgent';alerteHTML=`<span class="adanger">🔴 Fin dans ${jr} j — relance J-7</span>`;}
+    else if(jr<=15){urgClass='warn';alerteHTML=`<span class="awarn">🟠 Fin dans ${jr} j — relance J-15</span>`;}
+    else if(jr<=30){alerteHTML=`<span class="apurple">🟣 Fin dans ${jr} j — relance J-30</span>`;}
+    else{alerteHTML=`<span class="aok">✓ En cours — ${jr} j restants</span>`;}
+
+    const journalHTML=jLog.length
+      ?[...jLog].sort((a,b)=>new Date(b.date)-new Date(a.date)).slice(0,5).map(j=>`
+        <div class="journal-entry">
+          <span style="font-weight:600;color:var(--accent)">${j.date||''}</span>
+          <span class="badge b-${j.canal==='WhatsApp'?'abo':j.canal==='SMS'?'dec':'stop'}" style="margin:0 8px">${j.canal||''}</span>
+          <span style="color:var(--muted)">${j.note||''}</span>
+        </div>`).join('')
+      :'<p style="font-size:11px;color:var(--muted)">Aucun contact.</p>';
+
+    const msgJ30=`Bonjour,\n\nVous avez démarré votre test découverte réseau AEROGOMMAGE il y a 1 mois.\nNous avons transmis ${lApp.length} lead(s) sur votre secteur depuis le début.\n\nN'hésitez pas à nous faire un retour sur la qualité des contacts reçus.\n\nCordialement`;
+    const msgJ15=`Bonjour,\n\nVotre période de test découverte se termine dans 15 jours (le ${finD}).\nVous avez reçu ${lApp.length} lead(s) depuis le début de votre test.\n\nSouhaitez-vous poursuivre avec un abonnement ? Je reste disponible pour en discuter.\n\nCordialement`;
+    const msgJ7=`Bonjour,\n\nPlus que 7 jours avant la fin de votre test découverte (le ${finD}).\n${lApp.length} lead(s) ont été transmis sur votre secteur.\n\nMerci de me confirmer votre décision : abonnement ou arrêt ?\n\nCordialement`;
+
+    const sid=app.id.replace(/[^a-zA-Z0-9]/g,'_');
+    window['__msgs_'+sid]={j30:msgJ30,j15:msgJ15,j7:msgJ7};
+    window['__appid_'+sid]=app.id;
+
+    return`<div class="card-app ${urgClass}">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:8px">
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="width:38px;height:38px;border-radius:9px;background:linear-gradient(135deg,#6c63ff,#ff6584);display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:700;color:#fff">${(app.nom||'?').charAt(0)}</div>
+          <div>
+            <strong style="font-size:13px">${app.nom}</strong>
+            <span class="badge b-dec" style="margin-left:8px">Test découverte</span>
+            ${app.telephone?`<span style="font-size:11px;color:var(--muted);margin-left:8px">📱 ${app.telephone}</span>`:''}
+          </div>
+        </div>
+        <div style="text-align:right;font-size:11px;color:var(--muted)">Début : ${app.debut_test||'—'} — Fin : <strong style="color:var(--text)">${finD}</strong></div>
+      </div>
+      <div style="display:flex;gap:10px;margin-top:12px;flex-wrap:wrap;align-items:center">
+        <div class="metric" style="min-width:90px;padding:10px 12px"><div class="metric-label">Leads transmis</div><div class="metric-value" style="font-size:22px;color:var(--accent)">${lApp.length}</div></div>
+        <div class="metric" style="min-width:90px;padding:10px 12px"><div class="metric-label">Refusés</div><div class="metric-value" style="font-size:22px;color:var(--orange)">${lApp.filter(l=>l.statut==='refuse').length}</div></div>
+        <div class="metric" style="min-width:90px;padding:10px 12px"><div class="metric-label">Contacts</div><div class="metric-value" style="font-size:22px;color:var(--accent3)">${jLog.length}</div></div>
+        <div style="flex:1">${alerteHTML}</div>
+      </div>
+      ${lApp.length?`
+      <div style="margin-top:12px">
+        <p style="font-size:12px;font-weight:600;margin-bottom:6px">Leads transmis</p>
+        <table><thead><tr><th>Date</th><th>Prestation</th><th>Statut</th><th></th></tr></thead><tbody>
+        ${[...lApp].sort((a,b)=>new Date(b.date)-new Date(a.date)).map(l=>{
+          const refuse=l.statut==='refuse';
+          return`<tr>
+            <td style="color:var(--muted);font-size:11px">${l.date||'—'}</td>
+            <td><span class="badge b-prest" style="${refuse?'text-decoration:line-through;opacity:.6':''}">${l.prestation} — ${PRESTS[l.prestation]||l.prestation}</span></td>
+            <td>${refuse
+              ?'<span class="badge" style="background:#ffa04022;color:#ffa040;border:1px solid #ffa04044">⚠ Refusé</span>'
+              :'<span class="badge" style="background:#43e97b22;color:#43e97b;border:1px solid #43e97b44">✓ Transmis</span>'}</td>
+            <td>${refuse
+              ?`<button class="btn btn-sm btn-green" onclick="toggleRefus('${l.id}',false)">↩ Rétablir</button>`
+              :`<button class="btn btn-sm btn-orange" onclick="toggleRefus('${l.id}',true)">⚠ Refusé</button>`}</td>
+          </tr>`;
+        }).join('')}
+        </tbody></table>
+      </div>`:''}
+      <div style="margin-top:12px">${dotsHTML(lApp.length,12,false,lApp)}</div>
+      <div class="sep"></div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px">
+        <button class="btn btn-sm btn-green" onclick="showMsg('${sid}','j30')">💬 J-30</button>
+        <button class="btn btn-sm btn-green" onclick="showMsg('${sid}','j15')">💬 J-15</button>
+        <button class="btn btn-sm btn-green" onclick="showMsg('${sid}','j7')">💬 J-7</button>
+        <button class="btn btn-sm btn-purple" onclick="showAddContact('${sid}')">＋ Contact</button>
+      </div>
+      <div id="msg-${sid}" style="display:none"></div>
+      <div id="cf-${sid}" class="contact-form" style="display:none">
+        <div class="row">
+          <div class="col" style="max-width:140px"><label>Date</label><input type="date" id="cdate-${sid}" value="${new Date().toISOString().split('T')[0]}"></div>
+          <div class="col" style="max-width:150px"><label>Canal</label><select id="ccanal-${sid}"><option>WhatsApp</option><option>SMS</option><option>Téléphone</option><option>Mail</option></select></div>
+          <div class="col"><label>Note</label><input type="text" id="cnote-${sid}" placeholder="ex. Intéressé, rappel prévu..."></div>
+        </div>
+        <div style="margin-top:10px;display:flex;gap:8px">
+          <button class="btn btn-primary btn-sm" onclick="saveContact('${sid}')">✓ Enregistrer</button>
+          <button class="btn btn-sm" onclick="document.getElementById('cf-${sid}').style.display='none'">Annuler</button>
+        </div>
+      </div>
+      <p style="font-size:12px;font-weight:600;margin-bottom:8px">Journal des contacts</p>
+      <div id="jlog-${sid}">${journalHTML}</div>
+    </div>`;
+  }).join('');
+}
+
+function showMsg(sid,type){
+  const div=document.getElementById('msg-'+sid);
+  const msgs=window['__msgs_'+sid];
+  if(!msgs)return;
+  if(div.dataset.open===type){div.style.display='none';div.dataset.open='';return;}
+  div.innerHTML=`<div class="msg-box">${msgs[type]}</div><button class="btn btn-sm btn-green" style="margin-top:8px" onclick="copyMsg('${sid}','${type}')">📋 Copier</button>`;
+  div.style.display='block';div.dataset.open=type;
+}
+function copyMsg(sid,type){
+  const msgs=window['__msgs_'+sid];if(!msgs)return;
+  navigator.clipboard.writeText(msgs[type]).catch(()=>{});
+  toast('Message copié — prêt à coller dans WhatsApp ou SMS');
+}
+function showAddContact(sid){
+  const f=document.getElementById('cf-'+sid);f.style.display=f.style.display==='none'?'block':'none';
+}
+async function saveContact(sid){
+  const appId=window['__appid_'+sid];
+  const date=document.getElementById('cdate-'+sid).value;
+  const canal=document.getElementById('ccanal-'+sid).value;
+  const note=document.getElementById('cnote-'+sid).value;
+  try{
+    const r=await atPost('Journal_contacts',{applicateur:appId,date,canal,note});
+    journalData.push({id:r.records[0].id,...r.records[0].fields});
+    document.getElementById('cf-'+sid).style.display='none';
+    toast('Contact enregistré');renderDecouverte();
+  }catch(e){toast('Erreur : '+e.message,false);}
+}
+
+async function saveLead(){
+  const appId=document.getElementById('s-app').value;
+  const prestation=document.getElementById('s-prest').value;
+  const date=document.getElementById('s-date').value;
+  if(!appId||!prestation||!date){toast('Tous les champs sont requis',false);return;}
+  // Vérif carnet
+  const app=apps.find(a=>a.id===appId);
+  if(app&&app.cat==='abonne'){
+    const now=new Date();
+    const pb=getPeriodeBounds(app.type_periode||'1-31',now);
+    const pLeads=leads.filter(l=>{if(!l.date)return false;const d=new Date(l.date);return l.applicateur===appId&&d>=pb.debut&&d<=pb.fin;});
+    const st=carnetState(appId,pLeads,pb.year,pb.month,app?.type_periode||'1-31');
+    const rs=reglState(appId,app.type_periode||'1-31');
+    // Blocage règlement → stocker en attente
+    if(rs.bloque && !rs.valide){
+      const email=app.email_applicateur||app.email||'';
+      if(!confirm(`⚠ Règlement non validé pour ${app.nom}.\n\nLe lead sera mis en attente et un email sera envoyé automatiquement à l'applicateur.\n\nConfirmer la mise en attente ?`)) return;
+      document.getElementById('save-msg').textContent='Mise en attente...';
+      try{
+        const dateSaisie=new Date().toISOString().split('T')[0];
+        const r=await atPost('Leads_Attente',{
+          applicateur:appId,
+          prestation:document.getElementById('s-prest').value,
+          date:document.getElementById('s-date').value,
+          date_saisie:dateSaisie,
+          email_applicateur:email
+        });
+        leadsAttente.push({id:r.records[0].id,...r.records[0].fields});
+        document.getElementById('s-app').value='';
+        document.getElementById('s-prest').value='';
+        document.getElementById('s-app-search').value='';
+        document.getElementById('s-prest-search').value='';
+        render();
+        document.getElementById('save-msg').textContent='';
+        toast(`📬 Lead mis en attente — email envoyé à ${app.nom}`);
+      }catch(e){document.getElementById('save-msg').textContent='';toast('Erreur : '+e.message,false);}
+      return;
+    }
+    if(!st.canAdd){
+      if(st.count>=SEUIL_EXT_MAX){
+        toast('⛔ Carnet complet (20 leads) — impossible d\'enregistrer',false);
+        return;
+      } else if(st.ext && st.count>=SEUIL_MAX && !isReglExtValide(appId,pb.year,pb.month)){
+        // Extension activée mais règlement pas validé → mise en attente
+        const email=app.email_applicateur||'';
+        if(!confirm(`⚠ Extension 13–20 activée mais règlement non validé pour ${app.nom}.\n\nLe lead sera mis en attente et un email sera envoyé à l'applicateur.\n\nConfirmer la mise en attente ?`)) return;
+        document.getElementById('save-msg').textContent='Mise en attente...';
+        try{
+          const r=await atPost('Leads_Attente',{
+            applicateur:appId,
+            prestation:document.getElementById('s-prest').value,
+            date:document.getElementById('s-date').value,
+            date_saisie:new Date().toISOString().split('T')[0],
+            email_applicateur:email,
+            type_attente:'extension'
+          });
+          leadsAttente.push({id:r.records[0].id,...r.records[0].fields});
+          document.getElementById('s-app').value='';
+          document.getElementById('s-prest').value='';
+          document.getElementById('s-app-search').value='';
+          document.getElementById('s-prest-search').value='';
+          render();
+          document.getElementById('save-msg').textContent='';
+          toast(`📬 Lead extension mis en attente — email envoyé à ${app.nom}`);
+        }catch(e){document.getElementById('save-msg').textContent='';toast('Erreur : '+e.message,false);}
+        return;
+      } else {
+        toast('⛔ Plafond 12 leads atteint — activez d\'abord l\'extension carnet 13–20',false);
+        return;
+      }
+    }
+  }
+  document.getElementById('save-msg').textContent='Enregistrement...';
+  try{
+    const r=await atPost('Leads',{applicateur:appId,prestation,date});
+    leads.push({id:r.records[0].id,...r.records[0].fields});
+    // Archiver si on est après le 23 et que c'est un abonné
+    if(app&&app.cat==='abonne'){
+      const now2=new Date();
+      const pb2=getPeriodeBounds(app.type_periode||'1-31',now2);
+      if(now2.getDate()>=23){
+        const pLeads2=leads.filter(l=>{if(!l.date)return false;const d=new Date(l.date);return l.applicateur===appId&&d>=pb2.debut&&d<=pb2.fin;});
+        const st2=carnetState(appId,pLeads2,pb2.year,pb2.month,app?.type_periode||'1-31');
+        await archiverMois(appId,pb2.year,pb2.month,pLeads2.length,st2.ext,st2.facturation);
+      }
+    }
+    document.getElementById('s-app').value='';
+    document.getElementById('s-prest').value='';
+    document.getElementById('s-app-search').value='';
+    document.getElementById('s-prest-search').value='';
+    render();toast('✓ Lead enregistré dans Airtable');
+    document.getElementById('save-msg').textContent='';
+  }catch(e){document.getElementById('save-msg').textContent='';toast('Erreur : '+e.message,false);}
+}
+
+function editLead(id){
+  document.querySelectorAll('[id^="lead-edit-"]').forEach(el=>el.style.display='none');
+  const row=document.getElementById('lead-edit-'+id);
+  if(row)row.style.display='table-row';
+}
+
+function closeEditLead(id){
+  const row=document.getElementById('lead-edit-'+id);
+  if(row)row.style.display='none';
+}
+
+async function saveEditLead(id){
+  const date=document.getElementById('led-date-'+id).value;
+  const prestation=document.getElementById('led-prest-'+id).value;
+  if(!date||!prestation){toast('Tous les champs sont requis',false);return;}
+  try{
+    const r=await atPatch('Leads',id,{date,prestation});
+    const l=leads.find(x=>x.id===id);
+    if(l){l.date=r.fields.date;l.prestation=r.fields.prestation;}
+    toast('✓ Lead modifié');
+    render();
+  }catch(e){toast('Erreur : '+e.message,false);}
+}
+
+async function deleteLead(id){
+  if(!confirm('Supprimer ce lead ?'))return;
+  try{
+    await atDelete('Leads',id);
+    leads=leads.filter(l=>l.id!==id);
+    toast('Lead supprimé');
+    render();
+  }catch(e){toast('Erreur : '+e.message,false);}
+}
+
+async function toggleRefus(id, refuse){
+  try{
+    await atPatch('Leads',id,{statut: refuse?'refuse':'transmis'});
+    const l=leads.find(x=>x.id===id);
+    if(l)l.statut=refuse?'refuse':'transmis';
+    toast(refuse?'⚠ Lead marqué comme refusé':'✓ Lead rétabli comme transmis');
+    render();
+  }catch(e){toast('Erreur : '+e.message,false);}
+}
+
+async function saveApp(){
+  const nom=document.getElementById('a-nom').value.trim();
+  const cat=document.getElementById('a-cat').value;
+  const editId=document.getElementById('a-edit-id').value;
+  if(!nom){toast('Nom requis',false);return;}
+  const fields={nom:nom.toUpperCase(),cat};
+  if(cat==='abonne'){fields.type_periode=document.getElementById('a-type').value;fields.objectif=parseInt(document.getElementById('a-obj').value)||6;fields.email_applicateur=document.getElementById('a-email').value;fields.date_adhesion=document.getElementById('a-adhesion').value;fields.interne=document.getElementById('a-interne').checked;}
+  if(cat==='decouverte'){fields.debut_test=document.getElementById('a-debut').value;fields.telephone=document.getElementById('a-tel').value;fields.email_applicateur=document.getElementById('a-email-dec').value;}
+  document.getElementById('a-msg').textContent='Enregistrement...';
+  try{
+    if(editId){
+      const r=await atPatch('Applicateurs',editId,fields);
+      const idx=apps.findIndex(a=>a.id===editId);
+      if(idx>-1)apps[idx]={id:editId,...r.fields};
+      toast('✓ Applicateur modifié');
+      cancelEditApp();
+    }else{
+      const r=await atPost('Applicateurs',fields);
+      apps.push({id:r.records[0].id,...r.records[0].fields});
+      ['a-nom','a-obj','a-debut','a-tel','a-email','a-email-dec','a-adhesion'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+      document.getElementById('a-obj').value='6';
+      toast('✓ Applicateur ajouté');
+    }
+    document.getElementById('a-msg').textContent='';
+    apps.sort((a,b)=>(a.nom||'').localeCompare(b.nom||'','fr'));
+    render();
+  }catch(e){document.getElementById('a-msg').textContent='';toast('Erreur : '+e.message,false);}
+}
+
+function editApp(id){
+  const a=apps.find(x=>x.id===id);
+  if(!a)return;
+  document.getElementById('a-edit-id').value=id;
+  document.getElementById('a-nom').value=a.nom||'';
+  document.getElementById('a-cat').value=a.cat||'abonne';
+  toggleCatFields();
+  document.getElementById('a-type').value=a.type_periode||'1-31';
+  document.getElementById('a-obj').value=a.objectif||6;
+  document.getElementById('a-debut').value=a.debut_test||'';
+  document.getElementById('a-tel').value=a.telephone||'';
+  document.getElementById('a-adhesion').value=a.date_adhesion||'';
+  document.getElementById('a-interne').checked=a.interne||false;
+  document.getElementById('a-email').value=a.email_applicateur||'';
+  document.getElementById('a-email-dec').value=a.email_applicateur||'';
+  document.getElementById('app-form-title').textContent='Modifier '+(a.nom||'');
+  document.getElementById('app-form-btn').textContent='✓ Enregistrer les modifications';
+  document.getElementById('app-form-cancel').style.display='inline-block';
+  // Scroll vers le formulaire
+  document.getElementById('app-form-title').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function cancelEditApp(){
+  document.getElementById('a-edit-id').value='';
+  ['a-nom','a-obj','a-debut','a-tel','a-email','a-email-dec','a-adhesion'].forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  document.getElementById('a-cat').value='abonne';
+  document.getElementById('a-type').value='1-31';
+  document.getElementById('a-obj').value='6';
+  toggleCatFields();
+  document.getElementById('app-form-title').textContent='Ajouter un applicateur';
+  document.getElementById('app-form-btn').textContent='＋ Ajouter';
+  document.getElementById('app-form-cancel').style.display='none';
+}
+
+async function delApp(id){
+  if(!confirm('Supprimer cet applicateur ?'))return;
+  try{await atDelete('Applicateurs',id);apps=apps.filter(a=>a.id!==id);toast('Supprimé');render();}
+  catch(e){toast('Erreur : '+e.message,false);}
+}
+
+function renderNA(){
+  const now=new Date(), y=now.getFullYear();
+  const lAn=leadsNA.filter(l=>l.date&&new Date(l.date).getFullYear()===y);
+
+  // Synthèse annuelle
+  const synth=document.getElementById('na-synthese');
+  const parPrest=lAn.reduce((a,l)=>{a[l.prestation]=(a[l.prestation]||0)+1;return a;},{});
+  const prestHTML=Object.entries(parPrest).map(([k,v])=>`<span class="badge b-prest" style="margin-right:6px;font-size:12px;padding:4px 10px">${k} — ${PRESTS[k]||k} : <strong>${v}</strong></span>`).join('');
+  synth.innerHTML=`
+    <div class="grid4" style="margin-bottom:12px">
+      <div class="metric c-orange"><div class="metric-label">Total année ${y}</div><div class="metric-value">${lAn.length}</div></div>
+      <div class="metric"><div class="metric-label">Ce mois</div><div class="metric-value">${lAn.filter(l=>new Date(l.date).getMonth()===now.getMonth()).length}</div></div>
+      <div class="metric"><div class="metric-label">Départements</div><div class="metric-value">${[...new Set(lAn.map(l=>l.departement).filter(Boolean))].length}</div></div>
+      <div class="metric c-pink"><div class="metric-label">Non attribués</div><div class="metric-value">${leadsNA.filter(l=>!l.attribue_a).length}</div></div>
+    </div>
+    <div style="margin-bottom:8px;font-size:12px;color:var(--muted);margin-bottom:4px">Répartition par prestation :</div>
+    <div style="display:flex;flex-wrap:wrap;gap:6px">${prestHTML||'<span style="color:var(--muted);font-size:12px">Aucun lead</span>'}</div>`;
+
+  // Liste par département
+  const liste=document.getElementById('na-liste');
+  if(!leadsNA.length){liste.innerHTML='<p class="loading">Aucun lead non attribué.</p>';return;}
+
+  // Grouper par département
+  const parDept={};
+  leadsNA.forEach(l=>{
+    const d=l.departement||'—';
+    if(!parDept[d])parDept[d]=[];
+    parDept[d].push(l);
+  });
+
+  liste.innerHTML=Object.entries(parDept).sort((a,b)=>a[0].localeCompare(b[0],'fr')).map(([dept,dLeads])=>{
+    const rows=dLeads.sort((a,b)=>new Date(b.date)-new Date(a.date)).map(l=>{
+      // Chercher applicateurs du même département
+      const deptNum=dept.replace(/\D/g,'');
+      const appsDept=apps.filter(a=>a.cat==='abonne'&&(a.nom||'').includes(deptNum));
+      const attribBtn=l.attribue_a
+        ?`<span class="badge b-abo">Attribué → ${(apps.find(a=>a.id===l.attribue_a)||{}).nom||l.attribue_a}</span>`
+        :`<select onchange="attribuerLead('${l.id}',this.value)" style="font-size:11px;padding:3px 6px;width:auto">
+            <option value="">Attribuer...</option>
+            ${apps.filter(a=>a.cat==='abonne').map(a=>`<option value="${a.id}" ${appsDept.find(x=>x.id===a.id)?'style="font-weight:700;color:#43e97b"':''}>${a.nom}</option>`).join('')}
+          </select>`;
+      return`<tr>
+        <td style="color:var(--muted)">${l.date||'—'}</td>
+        <td><span class="badge b-prest">${l.prestation||'—'} — ${PRESTS[l.prestation]||''}</span></td>
+        <td>${attribBtn}</td>
+        <td><button class="btn btn-sm btn-danger" onclick="deleteNA('${l.id}')">✕</button></td>
+      </tr>`;
+    }).join('');
+    return`<div style="margin-bottom:16px">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:8px">
+        <div style="width:36px;height:36px;border-radius:8px;background:linear-gradient(135deg,var(--accent),var(--accent2));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;color:#fff">${dept}</div>
+        <strong style="font-size:14px">Département ${dept}</strong>
+        <span class="badge b-dec">${dLeads.length} lead${dLeads.length>1?'s':''}</span>
+        ${dLeads.filter(l=>!l.attribue_a).length>0?`<span class="badge b-stop">${dLeads.filter(l=>!l.attribue_a).length} non attribué${dLeads.filter(l=>!l.attribue_a).length>1?'s':''}</span>`:'<span class="badge b-abo">✓ Tous attribués</span>'}
+      </div>
+      <table><thead><tr><th>Date</th><th>Prestation</th><th>Attribution</th><th></th></tr></thead>
+      <tbody>${rows}</tbody></table>
+    </div>`;
+  }).join('');
+}
+
+async function saveLeadNA(){
+  const dept=document.getElementById('na-dept').value.trim();
+  const prest=document.getElementById('na-prest').value;
+  const date=document.getElementById('na-date').value;
+  if(!dept||!prest||!date){toast('Tous les champs sont requis',false);return;}
+  document.getElementById('na-msg').textContent='Enregistrement...';
+  try{
+    const r=await atPost('Leads_NA',{departement:dept,prestation:prest,date,attribue_a:''});
+    leadsNA.push({id:r.records[0].id,...r.records[0].fields});
+    document.getElementById('na-dept').value='';
+    document.getElementById('na-prest').value='';
+    renderNA();
+    document.getElementById('na-msg').textContent='';
+    toast('✓ Lead non attribué enregistré');
+  }catch(e){document.getElementById('na-msg').textContent='';toast('Erreur : '+e.message,false);}
+}
+
+async function attribuerLead(naId, appId){
+  if(!appId)return;
+  try{
+    await fetch(`${AT_URL}/Leads_NA/${naId}`,{
+      method:'PATCH',headers:HDR,
+      body:JSON.stringify({fields:{attribue_a:appId}})
+    });
+    const l=leadsNA.find(x=>x.id===naId);
+    if(l)l.attribue_a=appId;
+    renderNA();
+    const appNom=(apps.find(a=>a.id===appId)||{}).nom||'';
+    toast(`✓ Lead attribué à ${appNom}`);
+  }catch(e){toast('Erreur : '+e.message,false);}
+}
+
+async function deleteNA(id){
+  if(!confirm('Supprimer ce lead ?'))return;
+  try{
+    await atDelete('Leads_NA',id);
+    leadsNA=leadsNA.filter(l=>l.id!==id);
+    renderNA();toast('Lead supprimé');
+  }catch(e){toast('Erreur : '+e.message,false);}
+}
+
+document.getElementById('s-date').value=new Date().toISOString().split('T')[0];
+document.getElementById('na-date').value=new Date().toISOString().split('T')[0];
+document.getElementById('s-app').addEventListener('change',checkSaisieStatus);
+loadAll();
+</script>
+</body>
+</html>
