@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Suivi Réseau — Aerogomm</title>
+<style>
+  :root{
+    --bg:#f5f6f8; --card:#ffffff; --ink:#1f2430; --muted:#6b7280;
+    --accent:#2f6fed; --green:#1aa06d; --orange:#e08a1e; --red:#d94f4f; --pink:#c14f8f;
+    --border:#e5e7eb;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);}
+  header{background:var(--ink);color:#fff;padding:16px 18px;display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:8px;}
+  header h1{font-size:17px;margin:0;font-weight:600;}
+  header .who{font-size:13px;opacity:.75;}
+  nav{display:flex;gap:6px;padding:10px 14px;background:#fff;border-bottom:1px solid var(--border);overflow-x:auto;}
+  nav button{border:none;background:transparent;padding:9px 14px;border-radius:8px;font-size:13.5px;font-weight:600;color:var(--muted);cursor:pointer;white-space:nowrap;}
+  nav button.active{background:var(--accent);color:#fff;}
+  main{padding:14px;max-width:900px;margin:0 auto;}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:12px;padding:14px;margin-bottom:12px;}
+  .card-title{font-size:14px;font-weight:700;margin:0 0 10px 0;color:var(--ink);}
+  .grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-bottom:14px;}
+  @media(max-width:700px){.grid4{grid-template-columns:repeat(2,1fr);}}
+  .metric{background:#fff;border:1px solid var(--border);border-radius:10px;padding:10px;text-align:center;}
+  .metric-label{font-size:11px;color:var(--muted);}
+  .metric-value{font-size:20px;font-weight:800;}
+  .loading,.empty{color:var(--muted);font-size:13px;padding:10px 2px;}
+  .app-card{border:1px solid var(--border);border-radius:10px;padding:12px;margin-bottom:10px;position:relative;}
+  .app-card.due{border-left:4px solid var(--red);background:#fff6f6;}
+  .app-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;flex-wrap:wrap;}
+  .app-name{font-weight:700;font-size:14.5px;}
+  .badge{display:inline-block;font-size:11px;font-weight:700;padding:2px 8px;border-radius:20px;color:#fff;}
+  .b-abonne{background:var(--green);} .b-decouverte{background:var(--orange);} .b-stop{background:var(--muted);}
+  .b-reseau{background:var(--accent);}
+  .contact-row{margin-top:4px;font-size:12.5px;color:var(--muted);}
+  .contact-row a{color:var(--accent);text-decoration:none;margin-right:10px;}
+  .relance-row{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap;align-items:center;}
+  .relance-row input[type="date"], .relance-row select{border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:12.5px;}
+  .ca-row{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap;align-items:center;background:#f9fafb;border-radius:8px;padding:8px;}
+  .ca-row label{font-size:11.5px;color:var(--muted);display:block;margin-bottom:2px;}
+  .ca-row input[type="number"]{width:100px;border:1px solid var(--border);border-radius:7px;padding:6px 8px;font-size:13px;}
+  .ca-ytd{font-weight:700;color:var(--green);font-size:13px;}
+  .save-btn{border:none;background:var(--accent);color:#fff;padding:6px 12px;border-radius:7px;font-size:12.5px;font-weight:600;cursor:pointer;}
+  .save-btn:active{opacity:.7;}
+  .saved-flash{font-size:11.5px;color:var(--green);font-weight:700;margin-left:6px;display:none;}
+  .section{display:none;}
+  .section.active{display:block;}
+  .today-badge{font-size:10.5px;font-weight:700;padding:2px 7px;border-radius:20px;color:#fff;margin-right:6px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>📡 Suivi Réseau — Aerogomm</h1>
+  <div class="who">David · relances &amp; CA adhérents</div>
+</header>
+
+<nav id="tabs">
+  <button data-tab="aujourdhui" class="active">Aujourd'hui</button>
+  <button data-tab="p131">Période 1–31</button>
+  <button data-tab="p1514">Période 15–14</button>
+  <button data-tab="decouverte">Tests découverte</button>
+</nav>
+
+<main>
+
+  <!-- AUJOURD'HUI -->
+  <div class="section active" id="tab-aujourdhui">
+    <div class="grid4">
+      <div class="metric"><div class="metric-label">Relances en retard / dues</div><div class="metric-value" id="m-due">—</div></div>
+      <div class="metric"><div class="metric-label">Abonnés actifs</div><div class="metric-value" id="m-abo">—</div></div>
+      <div class="metric"><div class="metric-label">Tests en cours</div><div class="metric-value" id="m-tests">—</div></div>
+      <div class="metric"><div class="metric-label">CA cumulé année</div><div class="metric-value" id="m-ca">—</div></div>
+    </div>
+    <div class="card">
+      <p class="card-title">Relances à faire aujourd'hui (ou en retard)</p>
+      <div id="bloc-aujourdhui"><p class="loading">Chargement...</p></div>
+    </div>
+  </div>
+
+  <!-- PERIODE 1-31 -->
+  <div class="section" id="tab-p131">
+    <div class="card">
+      <p class="card-title">Abonnés — période 1 au 31</p>
+      <div id="bloc-p131"><p class="loading">Chargement...</p></div>
+    </div>
+  </div>
+
+  <!-- PERIODE 15-14 -->
+  <div class="section" id="tab-p1514">
+    <div class="card">
+      <p class="card-title">Abonnés — période 15 au 14</p>
+      <div id="bloc-p1514"><p class="loading">Chargement...</p></div>
+    </div>
+  </div>
+
+  <!-- TEST DECOUVERTE -->
+  <div class="section" id="tab-decouverte">
+    <div class="card">
+      <p class="card-title">Tests découverte réseau — suivi &amp; relances</p>
+      <div id="bloc-decouverte"><p class="loading">Chargement...</p></div>
+    </div>
+  </div>
+
+</main>
+
+<script>
+/* ============================================================
+   CONFIGURATION — à vérifier avant mise en ligne
+   ============================================================ */
+const AT_TOKEN = "patQgPTOIdBvWUjyY.558cdf938f80ded065b91e11e117ab9f63dd6f2a7e8c99d8387a40043b5cf994";
+const AT_BASE  = "appaGCOS3oYqU6DQh";
+const TBL_APPLICATEURS = "Applicateurs";
+const TBL_CA           = "CA_Mensuel";
+
+// Noms de champs Airtable dans "Applicateurs" — ADAPTE ICI si tes noms diffèrent
+const F = {
+  nom: "nom",
+  categorie: "categorie",       // valeurs attendues: abonne / decouverte / stop
+  typePeriode: "type_periode",  // valeurs attendues: 1-31 / 15-14
+  telephone: "telephone",
+  email: "email",
+  prochaineRelance: "ProchaineRelance", // Date
+  creneauRelance: "CreneauRelance"      // Sélection unique
+};
+
+// Champs de la table CA_Mensuel
+const CA_F = {
+  applicateur: "applicateur", // Lien vers Applicateurs
+  mois: "mois",               // texte "2026-07"
+  montant: "montant"          // nombre
+};
+
+const CRENEAUX = ["Début de matinée","Fin de matinée","Début d'après-midi","Fin d'après-midi","Début de soirée"];
+
+/* ============================================================ */
+
+const headers = {
+  "Authorization": "Bearer " + AT_TOKEN,
+  "Content-Type": "application/json"
+};
+
+function atUrl(table, params=""){
+  return `https://api.airtable.com/v0/${AT_BASE}/${encodeURIComponent(table)}${params}`;
+}
+
+async function atListAll(table, filterFormula=null){
+  let records = [];
+  let offset = null;
+  do{
+    let url = atUrl(table, "?pageSize=100" + (offset ? "&offset="+offset : "") + (filterFormula ? "&filterByFormula="+encodeURIComponent(filterFormula) : ""));
+    const res = await fetch(url, { headers });
+    if(!res.ok){ console.error("Airtable error", table, res.status, await res.text()); break; }
+    const data = await res.json();
+    records = records.concat(data.records || []);
+    offset = data.offset;
+  } while(offset);
+  return records;
+}
+
+async function atUpdate(table, recordId, fields){
+  const res = await fetch(atUrl(table, "/"+recordId), {
+    method: "PATCH",
+    headers,
+    body: JSON.stringify({ fields })
+  });
+  if(!res.ok){ console.error("Update failed", await res.text()); return null; }
+  return res.json();
+}
+
+async function atCreate(table, fields){
+  const res = await fetch(atUrl(table), {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ fields })
+  });
+  if(!res.ok){ console.error("Create failed", await res.text()); return null; }
+  return res.json();
+}
+
+function todayISO(){
+  return new Date().toISOString().slice(0,10);
+}
+function currentMonthKey(){
+  return new Date().toISOString().slice(0,7); // "2026-07"
+}
+function currentYear(){
+  return new Date().getFullYear();
+}
+
+let APPLICATEURS = [];
+let CA_RECORDS = []; // toutes les lignes CA_Mensuel de l'année en cours
+
+/* ---------- Chargement ---------- */
+async function loadAll(){
+  APPLICATEURS = await atListAll(TBL_APPLICATEURS);
+  const year = currentYear();
+  CA_RECORDS = await atListAll(TBL_CA, `FIND("${year}-", {${CA_F.mois}}) = 1`);
+  renderAll();
+}
+
+function caForApplicateur(recId){
+  return CA_RECORDS.filter(r => (r.fields[CA_F.applicateur]||[]).includes(recId));
+}
+function caYTD(recId){
+  return caForApplicateur(recId).reduce((sum,r) => sum + (Number(r.fields[CA_F.montant]) || 0), 0);
+}
+function caMoisActuel(recId){
+  const mk = currentMonthKey();
+  return caForApplicateur(recId).find(r => r.fields[CA_F.mois] === mk) || null;
+}
+
+function badgeForCategorie(cat){
+  if(cat === "abonne") return `<span class="badge b-abonne">Abonné</span>`;
+  if(cat === "decouverte") return `<span class="badge b-decouverte">Test découverte</span>`;
+  if(cat === "stop") return `<span class="badge b-stop">Stop</span>`;
+  return `<span class="badge b-reseau">${cat||"—"}</span>`;
+}
+
+/* ---------- Rendu d'une fiche applicateur ---------- */
+function renderAppCard(rec, opts={}){
+  const f = rec.fields;
+  const id = rec.id;
+  const nom = f[F.nom] || "(sans nom)";
+  const cat = f[F.categorie] || "";
+  const tel = f[F.telephone] || "";
+  const email = f[F.email] || "";
+  const relance = f[F.prochaineRelance] || "";
+  const creneau = f[F.creneauRelance] || "";
+  const ytd = caYTD(id).toLocaleString("fr-FR");
+  const moisRec = caMoisActuel(id);
+  const moisMontant = moisRec ? moisRec.fields[CA_F.montant] : "";
+  const isDue = relance && relance <= todayISO();
+
+  const creneauOptions = CRENEAUX.map(c => `<option value="${c}" ${c===creneau?"selected":""}>${c}</option>`).join("");
+
+  return `
+  <div class="app-card ${isDue ? "due":""}" data-id="${id}">
+    <div class="app-top">
+      <div>
+        <span class="app-name">${nom}</span>
+        ${badgeForCategorie(cat)}
+      </div>
+    </div>
+    <div class="contact-row">
+      ${tel ? `<a href="tel:${tel}">📞 ${tel}</a>`:""}
+      ${email ? `<a href="mailto:${email}">✉️ ${email}</a>`:""}
+    </div>
+    <div class="relance-row">
+      <div>
+        <label style="font-size:11px;color:var(--muted);display:block;">Prochaine relance</label>
+        <input type="date" class="in-relance" value="${relance}">
+      </div>
+      <div>
+        <label style="font-size:11px;color:var(--muted);display:block;">Créneau</label>
+        <select class="in-creneau">
+          <option value="">—</option>
+          ${creneauOptions}
+        </select>
+      </div>
+      <button class="save-btn btn-save-relance">Enregistrer</button>
+      <span class="saved-flash">✓ enregistré</span>
+    </div>
+    <div class="ca-row">
+      <div>
+        <label>CA du mois (${currentMonthKey()})</label>
+        <input type="number" class="in-ca-mois" value="${moisMontant}" placeholder="montant €">
+      </div>
+      <button class="save-btn btn-save-ca">Enregistrer CA</button>
+      <span class="saved-flash flash-ca">✓ enregistré</span>
+      <span class="ca-ytd">Cumulé ${currentYear()} : ${ytd} €</span>
+    </div>
+  </div>`;
+}
+
+function attachCardHandlers(container){
+  container.querySelectorAll(".app-card").forEach(card => {
+    const recId = card.dataset.id;
+
+    card.querySelector(".btn-save-relance").addEventListener("click", async () => {
+      const relance = card.querySelector(".in-relance").value;
+      const creneau = card.querySelector(".in-creneau").value;
+      const fields = {};
+      fields[F.prochaineRelance] = relance || null;
+      fields[F.creneauRelance] = creneau || null;
+      await atUpdate(TBL_APPLICATEURS, recId, fields);
+      const rec = APPLICATEURS.find(r => r.id === recId);
+      if(rec){ rec.fields[F.prochaineRelance] = relance; rec.fields[F.creneauRelance] = creneau; }
+      const flash = card.querySelector(".relance-row .saved-flash");
+      flash.style.display = "inline";
+      setTimeout(()=> flash.style.display="none", 2000);
+    });
+
+    card.querySelector(".btn-save-ca").addEventListener("click", async () => {
+      const montant = Number(card.querySelector(".in-ca-mois").value) || 0;
+      const mk = currentMonthKey();
+      const existing = caMoisActuel(recId);
+      if(existing){
+        await atUpdate(TBL_CA, existing.id, { [CA_F.montant]: montant });
+        existing.fields[CA_F.montant] = montant;
+      } else {
+        const created = await atCreate(TBL_CA, {
+          [CA_F.applicateur]: [recId],
+          [CA_F.mois]: mk,
+          [CA_F.montant]: montant
+        });
+        if(created) CA_RECORDS.push(created);
+      }
+      const flash = card.querySelector(".flash-ca");
+      flash.style.display = "inline";
+      setTimeout(()=> flash.style.display="none", 2000);
+      // Rafraîchit le cumul affiché
+      card.querySelector(".ca-ytd").textContent = `Cumulé ${currentYear()} : ${caYTD(recId).toLocaleString("fr-FR")} €`;
+    });
+  });
+}
+
+/* ---------- Rendu des onglets ---------- */
+function renderAll(){
+  renderAujourdhui();
+  renderListe("p131", r => r.fields[F.categorie] === "abonne" && r.fields[F.typePeriode] === "1-31");
+  renderListe("p1514", r => r.fields[F.categorie] === "abonne" && r.fields[F.typePeriode] === "15-14");
+  renderListe("decouverte", r => r.fields[F.categorie] === "decouverte");
+}
+
+function renderListe(tabKey, filterFn){
+  const list = APPLICATEURS.filter(filterFn);
+  const el = document.getElementById("bloc-"+tabKey);
+  if(list.length === 0){
+    el.innerHTML = `<p class="empty">Aucun applicateur dans cette catégorie.</p>`;
+    return;
+  }
+  list.sort((a,b) => (a.fields[F.nom]||"").localeCompare(b.fields[F.nom]||""));
+  el.innerHTML = list.map(r => renderAppCard(r)).join("");
+  attachCardHandlers(el);
+}
+
+function renderAujourdhui(){
+  const today = todayISO();
+  const dueList = APPLICATEURS.filter(r => {
+    const relance = r.fields[F.prochaineRelance];
+    return relance && relance <= today && r.fields[F.categorie] !== "stop";
+  });
+  dueList.sort((a,b) => (a.fields[F.prochaineRelance]||"").localeCompare(b.fields[F.prochaineRelance]||""));
+
+  const el = document.getElementById("bloc-aujourdhui");
+  if(dueList.length === 0){
+    el.innerHTML = `<p class="empty">Aucune relance due aujourd'hui 🎉</p>`;
+  } else {
+    el.innerHTML = dueList.map(r => renderAppCard(r)).join("");
+    attachCardHandlers(el);
+  }
+
+  // Métriques
+  document.getElementById("m-due").textContent = dueList.length;
+  document.getElementById("m-abo").textContent = APPLICATEURS.filter(r => r.fields[F.categorie]==="abonne").length;
+  document.getElementById("m-tests").textContent = APPLICATEURS.filter(r => r.fields[F.categorie]==="decouverte").length;
+  const totalCA = CA_RECORDS.reduce((s,r)=> s + (Number(r.fields[CA_F.montant])||0), 0);
+  document.getElementById("m-ca").textContent = totalCA.toLocaleString("fr-FR") + " €";
+}
+
+/* ---------- Navigation onglets ---------- */
+document.getElementById("tabs").addEventListener("click", (e) => {
+  const btn = e.target.closest("button[data-tab]");
+  if(!btn) return;
+  document.querySelectorAll("#tabs button").forEach(b => b.classList.remove("active"));
+  btn.classList.add("active");
+  document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+  document.getElementById("tab-"+btn.dataset.tab).classList.add("active");
+});
+
+/* ---------- Init + auto-refresh ---------- */
+loadAll();
+setInterval(loadAll, 5*60*1000); // rafraîchit toutes les 5 minutes
+</script>
+
+</body>
+</html>
