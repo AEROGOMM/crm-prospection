@@ -1,0 +1,657 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Tiers Externes — AEROGOMM</title>
+<style>
+  :root{
+    --bg:#f4f6f8; --card:#ffffff; --ink:#1c2530; --ink-soft:#5a6b7a;
+    --border:#e1e6ea; --accent:#2563eb; --accent-soft:#eaf1fe;
+    --green:#1f9d55; --red:#d0342c; --orange:#e08a1e; --grey:#7a8794;
+    --shadow:0 1px 3px rgba(20,30,40,.08), 0 1px 2px rgba(20,30,40,.06);
+    --radius:12px;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Arial,sans-serif;background:var(--bg);color:var(--ink);}
+  header{position:sticky;top:0;z-index:20;background:var(--card);border-bottom:1px solid var(--border);padding:12px 16px;display:flex;align-items:center;gap:12px;}
+  header h1{font-size:17px;margin:0;flex:1;font-weight:600;}
+  .icon-btn{background:none;border:none;font-size:20px;cursor:pointer;padding:6px 8px;border-radius:8px;color:var(--ink-soft);}
+  .icon-btn:hover{background:var(--bg);}
+  nav.tabs{display:flex;gap:4px;padding:8px 16px 0;background:var(--card);border-bottom:1px solid var(--border);}
+  nav.tabs button{background:none;border:none;padding:10px 14px;font-size:14px;font-weight:500;color:var(--ink-soft);cursor:pointer;border-bottom:2px solid transparent;}
+  nav.tabs button.active{color:var(--accent);border-bottom-color:var(--accent);}
+  .stats{display:flex;gap:10px;padding:12px 16px;overflow-x:auto;}
+  .stat{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;min-width:90px;}
+  .stat .label{font-size:11px;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.03em;}
+  .stat .value{font-size:20px;font-weight:700;margin-top:2px;}
+  main{padding:8px 16px 100px;max-width:900px;margin:0 auto;}
+  .toolbar{display:flex;gap:8px;margin:8px 0 14px;flex-wrap:wrap;}
+  .toolbar input[type=text], .toolbar select{padding:8px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;background:var(--card);}
+  .toolbar input[type=text]{flex:1;min-width:140px;}
+  .group-title{font-size:13px;font-weight:700;color:var(--ink-soft);text-transform:uppercase;letter-spacing:.04em;margin:18px 0 8px;display:flex;align-items:center;gap:8px;}
+  .group-title .count{background:var(--border);color:var(--ink-soft);border-radius:10px;padding:1px 8px;font-size:11px;}
+  .group-title.late{color:var(--red);}
+  .card{background:var(--card);border:1px solid var(--border);border-radius:var(--radius);padding:12px 14px;margin-bottom:8px;box-shadow:var(--shadow);cursor:pointer;}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;}
+  .card-title{font-weight:600;font-size:14.5px;}
+  .card-sub{font-size:12.5px;color:var(--ink-soft);margin-top:2px;}
+  .badge{font-size:10.5px;font-weight:700;padding:2px 8px;border-radius:20px;color:#fff;white-space:nowrap;}
+  .b-assurance{background:#2563eb;} .b-urssaf{background:var(--red);} .b-tva{background:var(--orange);}
+  .b-fournisseur{background:var(--green);} .b-autre{background:var(--grey);}
+  .card-actions{display:flex;gap:6px;margin-top:10px;}
+  .mini-btn{border:1px solid var(--border);background:var(--bg);border-radius:8px;padding:6px 10px;font-size:12.5px;cursor:pointer;color:var(--ink);}
+  .mini-btn.call{background:var(--accent-soft);border-color:var(--accent);color:var(--accent);}
+  .empty-state{text-align:center;color:var(--ink-soft);padding:40px 10px;font-size:14px;}
+  .fab{position:fixed;right:20px;bottom:24px;width:54px;height:54px;border-radius:50%;background:var(--accent);color:#fff;font-size:28px;border:none;box-shadow:0 4px 12px rgba(37,99,235,.4);cursor:pointer;z-index:30;}
+  .modal-overlay{position:fixed;inset:0;background:rgba(15,20,25,.45);z-index:100;display:flex;align-items:flex-end;justify-content:center;}
+  .modal-overlay[hidden]{display:none !important;}
+  @media(min-width:640px){.modal-overlay{align-items:center;}}
+  .modal{background:var(--card);width:100%;max-width:560px;max-height:92vh;overflow-y:auto;border-radius:16px 16px 0 0;padding:18px;}
+  @media(min-width:640px){.modal{border-radius:16px;}}
+  .modal h2{margin:0 0 12px;font-size:17px;display:flex;justify-content:space-between;align-items:center;}
+  .field{margin-bottom:12px;}
+  .field label{display:block;font-size:12px;color:var(--ink-soft);margin-bottom:4px;font-weight:600;}
+  .field input[type=text], .field input[type=date], .field input[type=time], .field select, .field textarea{
+    width:100%;padding:9px 10px;border:1px solid var(--border);border-radius:8px;font-size:14px;font-family:inherit;background:#fff;}
+  .field textarea{resize:vertical;min-height:70px;}
+  .row2{display:flex;gap:10px;}
+  .row2 > div{flex:1;}
+  .modal-actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:16px;}
+  .btn{padding:10px 14px;border-radius:9px;border:none;font-size:14px;font-weight:600;cursor:pointer;}
+  .btn-primary{background:var(--accent);color:#fff;}
+  .btn-outline{background:#fff;border:1px solid var(--border);color:var(--ink);}
+  .btn-danger{background:#fff;border:1px solid var(--red);color:var(--red);}
+  .btn-done{background:var(--green);color:#fff;}
+  .history{background:var(--bg);border-radius:8px;padding:10px;max-height:180px;overflow-y:auto;font-size:13px;white-space:pre-wrap;line-height:1.5;}
+  .history .entry{margin-bottom:8px;padding-bottom:8px;border-bottom:1px dashed var(--border);}
+  .history .entry:last-child{border-bottom:none;}
+  .history .entry .ts{color:var(--ink-soft);font-size:11px;display:block;margin-bottom:2px;}
+  .dictate-panel{display:flex;gap:8px;align-items:center;margin-top:6px;}
+  .dictate-btn{border:1px solid var(--accent);background:var(--accent-soft);color:var(--accent);border-radius:8px;padding:8px 12px;font-size:13px;cursor:pointer;}
+  .dictate-btn.on{background:var(--red);color:#fff;border-color:var(--red);}
+  .toast{position:fixed;bottom:90px;left:50%;transform:translateX(-50%);background:#1c2530;color:#fff;padding:10px 16px;border-radius:20px;font-size:13.5px;z-index:200;opacity:0;transition:opacity .25s;pointer-events:none;}
+  .toast.show{opacity:1;}
+  select.mini{padding:6px 8px;border:1px solid var(--border);border-radius:8px;font-size:12.5px;}
+</style>
+</head>
+<body>
+
+<header>
+  <h1>🗂️ Tiers Externes</h1>
+  <button class="icon-btn" id="btnSettings" title="Paramètres">⚙️</button>
+</header>
+
+<nav class="tabs">
+  <button data-tab="today" class="active">Aujourd'hui</button>
+  <button data-tab="actifs">Dossiers actifs</button>
+  <button data-tab="archives">Archives</button>
+</nav>
+
+<div class="stats" id="statsStrip"></div>
+
+<main>
+  <div class="toolbar" id="toolbar">
+    <input type="text" id="searchBox" placeholder="Rechercher un tiers, un interlocuteur...">
+    <select id="catFilter">
+      <option value="">Toutes catégories</option>
+    </select>
+  </div>
+  <div id="viewRoot"></div>
+</main>
+
+<button class="fab" id="btnNew" title="Nouveau dossier">+</button>
+<div class="toast" id="toast"></div>
+
+<!-- MODAL FICHE -->
+<div class="modal-overlay" id="ficheOverlay" hidden>
+  <div class="modal">
+    <h2><span id="ficheTitle">Nouveau dossier</span><button class="icon-btn" id="closeFiche">✕</button></h2>
+
+    <div class="row2">
+      <div class="field">
+        <label>Catégorie</label>
+        <input type="text" id="fCategorie" list="categorieList" placeholder="Assurance, URSSAF, TVA, Fournisseur, ou la vôtre...">
+        <datalist id="categorieList"></datalist>
+      </div>
+      <div class="field">
+        <label>Statut</label>
+        <select id="fStatut">
+          <option value="Actif">Actif</option>
+          <option value="Terminé">Terminé</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Tiers / Organisme</label>
+      <input type="text" id="fEntreprise" placeholder="Ex. Groupama, URSSAF Pays de la Loire...">
+    </div>
+
+    <div class="field">
+      <label>Objet du dossier</label>
+      <input type="text" id="fObjet" placeholder="Ex. Déclaration sinistre nacelle...">
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Interlocuteur</label>
+        <input type="text" id="fInterlocuteur">
+      </div>
+      <div class="field">
+        <label>Téléphone</label>
+        <input type="text" id="fTelephone">
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Email</label>
+      <input type="text" id="fEmail">
+    </div>
+
+    <div class="field">
+      <label>Historique</label>
+      <div class="history" id="fHistory"></div>
+    </div>
+
+    <div class="field">
+      <label>Ajouter une note</label>
+      <textarea id="fNewNote" placeholder="Ce qui vient de se passer, ce qui a été dit..."></textarea>
+      <div class="dictate-panel">
+        <button class="dictate-btn" id="btnDictate" type="button">🎙️ Dicter</button>
+        <span id="dictateStatus" style="font-size:12px;color:var(--ink-soft);"></span>
+      </div>
+    </div>
+
+    <div class="row2">
+      <div class="field">
+        <label>Prochaine relance</label>
+        <input type="date" id="fDate">
+      </div>
+      <div class="field">
+        <label>Créneau</label>
+        <select id="fCreneau">
+          <option value="">Sans créneau</option>
+          <option>Début de matinée</option>
+          <option>Fin de matinée</option>
+          <option>Début d'après-midi</option>
+          <option>Fin d'après-midi</option>
+          <option>Début de soirée</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="btnSaveNote">💾 Enregistrer</button>
+      <button class="btn btn-outline" id="btnCall">📞 Appeler</button>
+      <button class="btn btn-outline" id="btnPostpone1">⏭ Reporter +1j</button>
+      <button class="btn btn-done" id="btnCloturer">✔ Terminer le dossier</button>
+      <button class="btn btn-danger" id="btnDelete">🗑 Supprimer</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL SETTINGS -->
+<div class="modal-overlay" id="settingsOverlay" hidden>
+  <div class="modal">
+    <h2>Paramètres <button class="icon-btn" id="closeSettings">✕</button></h2>
+    <div class="field">
+      <label>Airtable Token</label>
+      <input type="text" id="cfgToken" placeholder="pat...">
+    </div>
+    <div class="field">
+      <label>Base ID</label>
+      <input type="text" id="cfgBaseId" placeholder="app...">
+    </div>
+    <div class="field">
+      <label>Nom de la table</label>
+      <input type="text" id="cfgTable" placeholder="TiersExternes">
+    </div>
+    <p style="font-size:12.5px;color:var(--ink-soft);">
+      Champs attendus dans Airtable : <code>Entreprise</code>, <code>Categorie</code> (select), <code>Objet</code>,
+      <code>Interlocuteur</code>, <code>Telephone</code>, <code>Email</code>, <code>Statut</code> (select: Actif/Terminé),
+      <code>ProchaineRelance</code> (date), <code>CreneauRelance</code> (select), <code>Notes</code> (long text),
+      <code>DateCreation</code> (date), <code>DateCloture</code> (date).
+    </p>
+    <div class="modal-actions">
+      <button class="btn btn-primary" id="btnSaveSettings">Enregistrer</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const CRENEAUX_ORDER = ["Début de matinée","Fin de matinée","Début d'après-midi","Fin d'après-midi","Début de soirée","Sans créneau"];
+const CAT_CLASS = {Assurance:"b-assurance", URSSAF:"b-urssaf", TVA:"b-tva", Fournisseur:"b-fournisseur", Autre:"b-autre"};
+const DEFAULT_CATEGORIES = ["Assurance","URSSAF","TVA","Fournisseur","Autre"];
+
+function getAllCategories(){
+  const found = new Set(RECORDS.map(r=>r.fields.Categorie).filter(Boolean));
+  const customs = [...found].filter(c=>!DEFAULT_CATEGORIES.includes(c)).sort((a,b)=>a.localeCompare(b,"fr"));
+  return [...DEFAULT_CATEGORIES, ...customs];
+}
+
+function updateCategoryUI(){
+  const cats = getAllCategories();
+  $("categorieList").innerHTML = cats.map(c=>`<option value="${c}">`).join("");
+  const filterCurrent = $("catFilter").value;
+  $("catFilter").innerHTML = `<option value="">Toutes catégories</option>` + cats.map(c=>`<option value="${c}">${c}</option>`).join("");
+  if(cats.includes(filterCurrent)) $("catFilter").value = filterCurrent;
+}
+
+let CFG = {};
+try{ CFG = JSON.parse(localStorage.getItem("tiersExternesConfig")||"{}"); }catch(e){ console.error(e); }
+let RECORDS = [];
+let currentTab = "today";
+let openId = null;
+
+function airtableReady(){ return CFG.token && CFG.baseId && CFG.table; }
+function toast(msg){
+  const t=$("toast"); t.textContent=msg; t.classList.add("show");
+  setTimeout(()=>t.classList.remove("show"), 2200);
+}
+function todayStr(){ const d=new Date(); return d.toISOString().slice(0,10); }
+
+// ---------- Airtable ----------
+async function fetchRecords(){
+  if(!airtableReady()) return;
+  let all=[]; let offset=null;
+  try{
+    do{
+      const url = `https://api.airtable.com/v0/${CFG.baseId}/${encodeURIComponent(CFG.table)}?pageSize=100${offset?`&offset=${offset}`:""}`;
+      const res = await fetch(url, {headers:{Authorization:`Bearer ${CFG.token}`}});
+      if(!res.ok) throw new Error("HTTP "+res.status);
+      const data = await res.json();
+      all = all.concat(data.records||[]);
+      offset = data.offset;
+    } while(offset);
+    RECORDS = all;
+    render();
+  }catch(e){
+    console.error(e);
+    toast("Erreur de synchronisation Airtable");
+  }
+}
+
+async function createRecord(fields){
+  const url = `https://api.airtable.com/v0/${CFG.baseId}/${encodeURIComponent(CFG.table)}`;
+  const res = await fetch(url,{method:"POST",headers:{Authorization:`Bearer ${CFG.token}`,"Content-Type":"application/json"},body:JSON.stringify({fields})});
+  if(!res.ok){ toast("Erreur de création"); throw new Error("create failed"); }
+  const data = await res.json();
+  RECORDS.push(data);
+  return data;
+}
+
+async function updateRecord(id, fields){
+  const url = `https://api.airtable.com/v0/${CFG.baseId}/${encodeURIComponent(CFG.table)}/${id}`;
+  const res = await fetch(url,{method:"PATCH",headers:{Authorization:`Bearer ${CFG.token}`,"Content-Type":"application/json"},body:JSON.stringify({fields})});
+  if(!res.ok){ toast("Erreur d'enregistrement"); throw new Error("update failed"); }
+  const data = await res.json();
+  const idx = RECORDS.findIndex(r=>r.id===id);
+  if(idx>-1) RECORDS[idx]=data;
+  return data;
+}
+
+async function deleteRecord(id){
+  const url = `https://api.airtable.com/v0/${CFG.baseId}/${encodeURIComponent(CFG.table)}/${id}`;
+  const res = await fetch(url,{method:"DELETE",headers:{Authorization:`Bearer ${CFG.token}`}});
+  if(!res.ok){ toast("Erreur de suppression"); throw new Error("delete failed"); }
+  RECORDS = RECORDS.filter(r=>r.id!==id);
+}
+
+// ---------- Helpers ----------
+function isOverdue(r){
+  const d = r.fields.ProchaineRelance;
+  if(!d) return false;
+  return d < todayStr();
+}
+function isToday(r){
+  return r.fields.ProchaineRelance === todayStr();
+}
+function actifs(){ return RECORDS.filter(r=>(r.fields.Statut||"Actif")==="Actif"); }
+function archives(){ return RECORDS.filter(r=>r.fields.Statut==="Terminé"); }
+
+function applyFilters(list){
+  const q = $("searchBox").value.trim().toLowerCase();
+  const cat = $("catFilter").value;
+  return list.filter(r=>{
+    if(cat && r.fields.Categorie!==cat) return false;
+    if(q){
+      const hay = [r.fields.Entreprise,r.fields.Objet,r.fields.Interlocuteur].filter(Boolean).join(" ").toLowerCase();
+      if(!hay.includes(q)) return false;
+    }
+    return true;
+  });
+}
+
+// ---------- Rendering ----------
+function renderStats(){
+  const act = actifs();
+  const late = act.filter(isOverdue).length;
+  const today = act.filter(isToday).length;
+  const doneThisMonth = archives().filter(r=>(r.fields.DateCloture||"").slice(0,7)===todayStr().slice(0,7)).length;
+  $("statsStrip").innerHTML = `
+    <div class="stat"><div class="label">Actifs</div><div class="value">${act.length}</div></div>
+    <div class="stat"><div class="label">Relances dues</div><div class="value" style="color:var(--red)">${late+today}</div></div>
+    <div class="stat"><div class="label">En retard</div><div class="value" style="color:var(--red)">${late}</div></div>
+    <div class="stat"><div class="label">Terminés ce mois</div><div class="value">${doneThisMonth}</div></div>
+  `;
+}
+
+function cardHTML(r){
+  const f = r.fields;
+  const cat = f.Categorie||"Autre";
+  const cls = CAT_CLASS[cat]||"b-autre";
+  const dateLabel = f.ProchaineRelance ? (isOverdue(r) ? `⚠ Relance en retard (${f.ProchaineRelance})` : `Relance : ${f.ProchaineRelance}${f.CreneauRelance?" · "+f.CreneauRelance:""}`) : "Pas de relance programmée";
+  return `
+    <div class="card" data-id="${r.id}">
+      <div class="card-top">
+        <div>
+          <div class="card-title">${f.Entreprise||"(sans nom)"}</div>
+          <div class="card-sub">${f.Objet||""}</div>
+        </div>
+        <span class="badge ${cls}">${cat}</span>
+      </div>
+      <div class="card-sub" style="margin-top:6px;">${dateLabel}</div>
+      <div class="card-actions">
+        ${f.Telephone?`<button class="mini-btn call" data-call="${f.Telephone}">📞 Appeler</button>`:""}
+        <button class="mini-btn" data-open="${r.id}">Ouvrir</button>
+      </div>
+    </div>`;
+}
+
+function renderToday(){
+  const act = applyFilters(actifs()).filter(r=> !r.fields.ProchaineRelance || r.fields.ProchaineRelance <= todayStr());
+  if(act.length===0){ $("viewRoot").innerHTML = `<div class="empty-state">Aucune relance due aujourd'hui 🎉</div>`; return; }
+  const groups = {};
+  act.forEach(r=>{
+    let key;
+    if(isOverdue(r)) key = "En retard";
+    else key = r.fields.CreneauRelance || "Sans créneau";
+    (groups[key]=groups[key]||[]).push(r);
+  });
+  const order = ["En retard", ...CRENEAUX_ORDER];
+  let html="";
+  order.forEach(key=>{
+    if(!groups[key]) return;
+    const isLate = key==="En retard";
+    html += `<div class="group-title ${isLate?"late":""}">${key} <span class="count">${groups[key].length}</span></div>`;
+    groups[key].forEach(r=> html += cardHTML(r));
+  });
+  $("viewRoot").innerHTML = html;
+}
+
+function renderActifs(){
+  const list = applyFilters(actifs());
+  if(list.length===0){ $("viewRoot").innerHTML = `<div class="empty-state">Aucun dossier actif</div>`; return; }
+  const byCat = {};
+  list.forEach(r=>{ const c=r.fields.Categorie||"Autre"; (byCat[c]=byCat[c]||[]).push(r); });
+  const order = getAllCategories();
+  let html="";
+  order.forEach(c=>{
+    if(!byCat[c]) return;
+    html += `<div class="group-title">${c} <span class="count">${byCat[c].length}</span></div>`;
+    byCat[c].forEach(r=> html += cardHTML(r));
+  });
+  $("viewRoot").innerHTML = html;
+}
+
+function renderArchives(){
+  let list = applyFilters(archives());
+  list.sort((a,b)=> (b.fields.DateCloture||"").localeCompare(a.fields.DateCloture||""));
+  if(list.length===0){ $("viewRoot").innerHTML = `<div class="empty-state">Aucun dossier archivé</div>`; return; }
+  $("viewRoot").innerHTML = list.map(r=>{
+    const f=r.fields; const cls = CAT_CLASS[f.Categorie]||"b-autre";
+    return `<div class="card" data-id="${r.id}">
+      <div class="card-top">
+        <div><div class="card-title">${f.Entreprise||"(sans nom)"}</div><div class="card-sub">${f.Objet||""}</div></div>
+        <span class="badge ${cls}">${f.Categorie||"Autre"}</span>
+      </div>
+      <div class="card-sub" style="margin-top:6px;">Clôturé le ${f.DateCloture||"?"}</div>
+      <div class="card-actions"><button class="mini-btn" data-open="${r.id}">Ouvrir</button></div>
+    </div>`;
+  }).join("");
+}
+
+function render(){
+  updateCategoryUI();
+  renderStats();
+  if(currentTab==="today") renderToday();
+  else if(currentTab==="actifs") renderActifs();
+  else renderArchives();
+  bindCardEvents();
+}
+
+function bindCardEvents(){
+  document.querySelectorAll("[data-open]").forEach(el=>{
+    el.addEventListener("click", ()=> openFiche(el.getAttribute("data-open")));
+  });
+  document.querySelectorAll(".card").forEach(el=>{
+    el.addEventListener("click", (e)=>{
+      if(e.target.closest("[data-call]") || e.target.closest("[data-open]")) return;
+      openFiche(el.getAttribute("data-id"));
+    });
+  });
+  document.querySelectorAll("[data-call]").forEach(el=>{
+    el.addEventListener("click", (e)=>{
+      e.stopPropagation();
+      window.location.href = "tel:"+el.getAttribute("data-call");
+    });
+  });
+}
+
+// ---------- Fiche modal ----------
+function openFiche(id){
+  openId = id;
+  const r = RECORDS.find(x=>x.id===id);
+  const f = r ? r.fields : {};
+  $("ficheTitle").textContent = f.Entreprise ? f.Entreprise : "Nouveau dossier";
+  $("fCategorie").value = f.Categorie || "Assurance";
+  $("fStatut").value = f.Statut || "Actif";
+  $("fEntreprise").value = f.Entreprise || "";
+  $("fObjet").value = f.Objet || "";
+  $("fInterlocuteur").value = f.Interlocuteur || "";
+  $("fTelephone").value = f.Telephone || "";
+  $("fEmail").value = f.Email || "";
+  $("fDate").value = f.ProchaineRelance || "";
+  $("fCreneau").value = f.CreneauRelance || "";
+  $("fNewNote").value = "";
+  renderHistory(f.Notes||"");
+  $("btnDelete").style.display = r ? "inline-block" : "none";
+  $("btnCloturer").style.display = r ? "inline-block" : "none";
+  $("btnCall").style.display = r ? "inline-block" : "none";
+  $("btnPostpone1").style.display = r ? "inline-block" : "none";
+  $("ficheOverlay").hidden = false;
+}
+
+function renderHistory(notes){
+  if(!notes){ $("fHistory").innerHTML = `<span style="color:var(--ink-soft);">Aucun historique pour l'instant.</span>`; return; }
+  $("fHistory").innerHTML = notes.split("\n\n").reverse().map(block=>{
+    const lines = block.split("\n");
+    const ts = lines[0]||"";
+    const body = lines.slice(1).join("\n");
+    return `<div class="entry"><span class="ts">${ts}</span>${body||ts}</div>`;
+  }).join("");
+}
+
+function closeFiche(){ $("ficheOverlay").hidden = true; openId=null; }
+
+function collectFieldsFromForm(){
+  return {
+    Categorie: $("fCategorie").value,
+    Statut: $("fStatut").value,
+    Entreprise: $("fEntreprise").value,
+    Objet: $("fObjet").value,
+    Interlocuteur: $("fInterlocuteur").value,
+    Telephone: $("fTelephone").value,
+    Email: $("fEmail").value,
+    ProchaineRelance: $("fDate").value || null,
+    CreneauRelance: $("fCreneau").value || null,
+  };
+}
+
+async function saveNote(){
+  if(!airtableReady()){ toast("Configurez Airtable dans ⚙"); return; }
+  const fields = collectFieldsFromForm();
+  const noteText = $("fNewNote").value.trim();
+  const r = openId ? RECORDS.find(x=>x.id===openId) : null;
+  let notes = r ? (r.fields.Notes||"") : "";
+  if(noteText){
+    const stamp = new Date().toLocaleString("fr-FR",{dateStyle:"short",timeStyle:"short"});
+    notes = notes ? notes + "\n\n" + stamp + "\n" + noteText : stamp + "\n" + noteText;
+  }
+  fields.Notes = notes;
+  try{
+    if(openId){
+      await updateRecord(openId, fields);
+    } else {
+      fields.DateCreation = todayStr();
+      const rec = await createRecord(fields);
+      openId = rec.id;
+    }
+    toast("Enregistré ✓");
+    render();
+    closeFiche();
+  }catch(e){}
+}
+
+async function postpone1Day(){
+  if(!openId) return;
+  const r = RECORDS.find(x=>x.id===openId);
+  const base = (r.fields.ProchaineRelance && r.fields.ProchaineRelance >= todayStr()) ? r.fields.ProchaineRelance : todayStr();
+  const d = new Date(base); d.setDate(d.getDate()+1);
+  const newDate = d.toISOString().slice(0,10);
+  $("fDate").value = newDate;
+  await updateRecord(openId, {ProchaineRelance:newDate});
+  toast("Relance reportée au "+newDate);
+  render();
+}
+
+async function cloturer(){
+  if(!openId){ toast("Enregistrez d'abord le dossier"); return; }
+  await updateRecord(openId, {Statut:"Terminé", DateCloture: todayStr()});
+  toast("Dossier terminé et archivé");
+  render();
+  closeFiche();
+}
+
+async function supprimer(){
+  if(!openId) return;
+  if(!confirm("Supprimer définitivement ce dossier ?")) return;
+  await deleteRecord(openId);
+  toast("Dossier supprimé");
+  render();
+  closeFiche();
+}
+
+function callCurrent(){
+  const r = openId ? RECORDS.find(x=>x.id===openId) : null;
+  const tel = r && r.fields.Telephone;
+  if(!tel){ toast("Aucun numéro renseigné"); return; }
+  window.location.href = "tel:"+tel;
+}
+
+// ---------- Dictée vocale ----------
+let recognizer = null;
+let recognizing = false;
+function initDictation(){
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if(!SR){ $("btnDictate").disabled = true; $("dictateStatus").textContent = "Non supporté sur ce navigateur"; return; }
+  recognizer = new SR();
+  recognizer.lang = "fr-FR";
+  recognizer.continuous = true;
+  recognizer.interimResults = false;
+  let baseText = "";
+  recognizer.onstart = ()=>{ baseText = $("fNewNote").value; };
+  recognizer.onresult = (e)=>{
+    let finalTranscript = "";
+    for(let i=e.resultIndex;i<e.results.length;i++){
+      if(e.results[i].isFinal) finalTranscript += e.results[i][0].transcript;
+    }
+    if(finalTranscript){
+      const sep = $("fNewNote").value.trim() ? " " : "";
+      $("fNewNote").value = ($("fNewNote").value + sep + finalTranscript).trim();
+    }
+  };
+  recognizer.onerror = ()=>{ stopDictation(); };
+  recognizer.onend = ()=>{ if(recognizing){ try{ recognizer.start(); }catch(e){} } };
+}
+function toggleDictation(){
+  if(!recognizer) return;
+  if(recognizing) stopDictation(); else startDictation();
+}
+function startDictation(){
+  recognizing = true;
+  $("btnDictate").classList.add("on");
+  $("btnDictate").textContent = "⏹ Arrêter";
+  $("dictateStatus").textContent = "Écoute en cours...";
+  try{ recognizer.start(); }catch(e){}
+}
+function stopDictation(){
+  recognizing = false;
+  $("btnDictate").classList.remove("on");
+  $("btnDictate").textContent = "🎙️ Dicter";
+  $("dictateStatus").textContent = "";
+  try{ recognizer.stop(); }catch(e){}
+}
+
+// ---------- Settings ----------
+function openSettings(){
+  $("cfgToken").value = CFG.token||"";
+  $("cfgBaseId").value = CFG.baseId||"";
+  $("cfgTable").value = CFG.table||"TiersExternes";
+  $("settingsOverlay").hidden = false;
+}
+function saveSettings(){
+  CFG = {token:$("cfgToken").value.trim(), baseId:$("cfgBaseId").value.trim(), table:$("cfgTable").value.trim()||"TiersExternes"};
+  try{
+    localStorage.setItem("tiersExternesConfig", JSON.stringify(CFG));
+  }catch(e){
+    toast("⚠ Impossible d'enregistrer localement (stockage bloqué par le navigateur)");
+    console.error(e);
+    return;
+  }
+  $("settingsOverlay").hidden = true;
+  toast("Paramètres enregistrés");
+  fetchRecords();
+}
+
+// ---------- Events ----------
+document.querySelectorAll("nav.tabs button").forEach(btn=>{
+  btn.addEventListener("click", ()=>{
+    document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.remove("active"));
+    btn.classList.add("active");
+    currentTab = btn.getAttribute("data-tab");
+    render();
+  });
+});
+$("searchBox").addEventListener("input", render);
+$("catFilter").addEventListener("change", render);
+$("btnNew").addEventListener("click", ()=> openFiche(null));
+$("closeFiche").addEventListener("click", closeFiche);
+$("btnSaveNote").addEventListener("click", saveNote);
+$("btnPostpone1").addEventListener("click", postpone1Day);
+$("btnCloturer").addEventListener("click", cloturer);
+$("btnDelete").addEventListener("click", supprimer);
+$("btnCall").addEventListener("click", callCurrent);
+$("btnDictate").addEventListener("click", toggleDictation);
+$("btnSettings").addEventListener("click", openSettings);
+$("closeSettings").addEventListener("click", ()=> $("settingsOverlay").hidden = true);
+$("btnSaveSettings").addEventListener("click", saveSettings);
+
+// ---------- Init ----------
+initDictation();
+if(!airtableReady()){
+  setTimeout(()=>{ toast("Configurez Airtable via ⚙ pour commencer"); openSettings(); }, 400);
+} else {
+  fetchRecords();
+}
+const SYNC_INTERVAL_MS = 5*60*1000;
+setInterval(()=>{
+  if(!airtableReady()) return;
+  if(recognizing) return;
+  fetchRecords();
+}, SYNC_INTERVAL_MS);
+</script>
+</body>
+</html>
