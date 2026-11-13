@@ -1,0 +1,813 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Questionnaire réseau</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:wght@600;700&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/pptxgenjs@4.0.1/dist/pptxgen.bundle.js"></script>
+<style>
+  :root {
+    --vert: #1F4D3A; --vert2: #2F6B4F; --feuille: #7FB069; --teinte: #EAF2E6; --ambre: #E9A23B; --rouge: #C8553D;
+    --encre: #1E2A24; --gris: #5E6B63; --ligne: #D9E2D6; --fond: #F6F8F5; --blanc: #FFFFFF;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--fond); color: var(--encre); font-family: "Source Sans 3", Calibri, Arial, sans-serif; font-size: 16px; }
+  header { background: var(--vert); color: #fff; padding: 22px 16px 26px; }
+  .wrap { max-width: 1100px; margin: 0 auto; padding: 0 16px; }
+  header .wrap { padding: 0; }
+  .marque { color: var(--feuille); font-weight: 700; letter-spacing: .12em; font-size: 13px; }
+  h1 { font-family: "Source Serif 4", Cambria, serif; font-size: 30px; margin: 6px 0 4px; }
+  header p { margin: 0; color: #D7E6D0; }
+  .barre { display: flex; flex-wrap: wrap; gap: 10px; margin: 18px 0 0; }
+  button { font: inherit; font-weight: 600; border: 0; border-radius: 10px; padding: 11px 16px; cursor: pointer; }
+  .b1 { background: var(--feuille); color: var(--vert); }
+  .b2 { background: rgba(255,255,255,.12); color: #fff; }
+  .b3 { background: var(--ambre); color: #3a2600; }
+  button:disabled { opacity: .45; cursor: not-allowed; }
+  .panneau { background: var(--blanc); border: 1px solid var(--ligne); border-radius: 14px; padding: 16px; margin: 18px 0; }
+  .panneau h2 { font-size: 17px; margin: 0 0 10px; }
+  label { display: block; font-size: 14px; font-weight: 600; margin: 10px 0 4px; }
+  input { width: 100%; font: inherit; padding: 10px 12px; border: 1px solid var(--ligne); border-radius: 8px; background: #fff; color: var(--encre); }
+  .aide { font-size: 13px; color: var(--gris); margin-top: 4px; }
+  .grille-cfg { display: grid; grid-template-columns: 1fr; gap: 0 16px; }
+  @media (min-width: 760px) { .grille-cfg { grid-template-columns: 2fr 1fr 1fr; } }
+  #msg { margin: 12px 0 0; font-size: 15px; min-height: 22px; }
+  .ok { color: var(--vert2); } .err { color: var(--rouge); }
+  .kpis { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px; margin: 18px 0; }
+  @media (min-width: 760px) { .kpis { grid-template-columns: repeat(3, 1fr); } }
+  @media (min-width: 1080px) { .kpis { grid-template-columns: repeat(6, 1fr); } }
+  .kpi { background: var(--blanc); border: 1px solid var(--ligne); border-radius: 14px; padding: 14px; text-align: center; }
+  .kpi b { display: block; font-family: "Source Serif 4", Cambria, serif; font-size: 30px; color: var(--vert); }
+  .kpi span { font-size: 13px; color: var(--gris); }
+  .theme { margin: 26px 0 8px; }
+  .theme small { color: var(--feuille); font-weight: 700; text-transform: uppercase; letter-spacing: .08em; font-size: 12px; }
+  .theme h2 { font-family: "Source Serif 4", Cambria, serif; color: var(--vert); margin: 2px 0 0; font-size: 24px; }
+  .cartes { display: grid; grid-template-columns: 1fr; gap: 14px; }
+  @media (min-width: 900px) { .cartes { grid-template-columns: 1fr 1fr; } }
+  .carte { background: var(--blanc); border: 1px solid var(--ligne); border-radius: 14px; padding: 16px; min-width: 0; }
+  .carte .num { color: var(--feuille); font-weight: 700; font-size: 13px; }
+  .carte h3 { font-size: 16px; margin: 2px 0 10px; }
+  .carte .nb { font-size: 13px; color: var(--gris); margin-top: 8px; }
+  .graph { position: relative; height: 240px; }
+  .verb { list-style: none; padding: 0; margin: 0; max-height: 260px; overflow-y: auto; }
+  .verb li { background: var(--teinte); border-radius: 8px; padding: 8px 10px; margin-bottom: 6px; font-size: 14px; }
+  .verb li i { display: block; }
+  .verb li small { color: var(--gris); }
+  .mots { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+  .mots span { background: var(--vert); color: #fff; border-radius: 99px; padding: 3px 10px; font-size: 13px; }
+  .noms { columns: 2; font-size: 14px; margin: 0; padding-left: 18px; }
+  #demoBandeau { display: none; background: #FFF3DC; color: #5a3d00; border-radius: 10px; padding: 10px 14px; margin-top: 16px; font-size: 14px; }
+  .progres { height: 14px; background: var(--teinte); border-radius: 99px; overflow: hidden; display: flex; margin: 10px 0 6px; }
+  .progres i { display: block; height: 100%; }
+  .legende { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; color: var(--gris); }
+  .legende b { color: var(--encre); }
+  .pastille { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; vertical-align: 0; }
+  .filtres { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 10px; }
+  .filtres button { background: var(--teinte); color: var(--vert); padding: 7px 12px; font-size: 14px; }
+  .filtres button.actif { background: var(--vert); color: #fff; }
+  .liste { width: 100%; border-collapse: collapse; font-size: 14px; }
+  .liste th { text-align: left; font-size: 12px; color: var(--gris); font-weight: 600; padding: 6px 8px; border-bottom: 1px solid var(--ligne); }
+  .liste td { padding: 9px 8px; border-bottom: 1px solid var(--ligne); vertical-align: top; }
+  .liste a { color: var(--vert2); font-weight: 600; text-decoration: none; white-space: nowrap; }
+  .badge { display: inline-block; border-radius: 99px; padding: 2px 9px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+  .st-0 { background: #E7ECEF; color: #3d4b55; } .st-1 { background: #FFF1D6; color: #7a5200; } .st-2 { background: #FDE6D8; color: #8a3b12; }
+  .st-3 { background: #F7DCD6; color: #8c2a17; } .st-4 { background: #DDEFD6; color: #275c1c; }
+  .petit { font-size: 12px; color: var(--gris); }
+  @media (max-width: 640px) {
+    .liste thead { display: none; }
+    .liste tr { display: block; border-bottom: 1px solid var(--ligne); padding: 8px 0; }
+    .liste td { display: block; border: 0; padding: 2px 4px; }
+  }
+  footer { color: var(--gris); font-size: 13px; text-align: center; padding: 30px 16px; }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <div class="marque">BIO TEAM FRANCE</div>
+    <h1>La Voix des Applicateurs</h1>
+    <p>Questionnaire téléphonique : suivi des appels et résultats</p>
+    <div class="barre">
+      <button class="b1" id="btnSaisir">Saisir un appel</button>
+      <button class="b2" id="btnCharger">Actualiser</button>
+      <button class="b3" id="btnPpt" disabled>Générer le PowerPoint</button>
+      <button class="b2" id="btnCfg">Réglages</button>
+      <button class="b2" id="btnDemo">Essayer avec des réponses fictives</button>
+    </div>
+  </div>
+</header>
+
+<div class="wrap">
+  <div id="demoBandeau">Vous regardez des <b>réponses fictives</b> de démonstration. Cliquez sur « Actualiser » pour voir les vraies.</div>
+
+  <div class="panneau" id="cfg" style="display:none">
+    <h2>Réglages Airtable (à faire une seule fois par appareil)</h2>
+    <div class="grille-cfg">
+      <div>
+        <label for="tok">Jeton d'accès Airtable</label>
+        <input id="tok" type="password" autocomplete="off" placeholder="pat...">
+        <div class="aide">Airtable → Espace constructeur → Jetons d'accès personnels. Droit « data.records:read » sur la base Applicateurs (votre jeton du suivi réseau convient s'il a ce droit).</div>
+      </div>
+      <div>
+        <label for="base">ID de la base</label>
+        <input id="base" value="appaGCOS3oYqU6DQh">
+        <div class="aide">Base « Applicateurs » (la même que le suivi réseau).</div>
+      </div>
+      <div>
+        <label for="table">Table des réponses</label>
+        <input id="table" value="Questionnaire_Reponses">
+      </div>
+    </div>
+    <label for="lienForm">Lien du questionnaire (après publication du formulaire)</label>
+    <input id="lienForm" placeholder="https://airtable.com/app.../pag.../form">
+    <div class="aide">Sert au bouton « Saisir un appel ».</div>
+    <div class="barre"><button class="b1" id="btnSave">Enregistrer</button></div>
+  </div>
+
+  <div id="msg"></div>
+  <div id="resultats"></div>
+</div>
+
+<footer>Outil interne · les réponses restent dans Airtable, le PowerPoint est créé sur votre appareil.</footer>
+
+<script>
+/* ===== Cœur de calcul + génération PowerPoint (partagé navigateur / test) ===== */
+var QS = {
+  FIELDS: {
+    nom: "Q1 Adhérent",
+    note: "Q2 Note réseau",
+    apprecie: "Q3 Points appréciés",
+    ameliorer: "Q4 Points à améliorer",
+    fileo: "Q5 Intérêt FILEO",
+    laser: "Q6 Évolution laser cryogénie",
+    nomReseau: "Q7 Nom AERONOVA",
+    prestations: "Q8 Prestations demandées",
+    rencontre: "Q9 Participation rencontre",
+    periodes: "Q10 Périodes préférées",
+    sujets: "Q11 Sujets rencontre",
+    remarques: "Q12 Remarques"
+  },
+  CHOICES: {
+    fileo: ["Oui, tout à fait", "Peut-être, j'aimerais en savoir plus", "Non, pas intéressé"],
+    laser: ["Oui, tout à fait", "Peut-être, j'aimerais en savoir plus", "Non, pas intéressé"],
+    nomReseau: ["Oui, tout à fait", "Peut-être, j'aimerais en savoir plus", "Non, pas intéressé"],
+    rencontre: ["Oui", "Peut-être, selon les dates", "Non"],
+    periodes: ["Début mai 2027", "Mi-mai 2027", "Fin mai 2027", "En semaine", "Le week-end"]
+  },
+  QUESTIONS: [
+    { n: 1, key: "nom", theme: 1, type: "nom", q: "Nom de l'applicateur ou de l'entreprise" },
+    { n: 2, key: "note", theme: 2, type: "note", q: "Quelle note attribuez-vous au réseau BIO TEAM FRANCE ?" },
+    { n: 3, key: "apprecie", theme: 2, type: "texte", q: "Qu'appréciez-vous le plus dans le réseau ?" },
+    { n: 4, key: "ameliorer", theme: 2, type: "texte", q: "Quels aspects du réseau faudrait-il améliorer en priorité ?" },
+    { n: 5, key: "fileo", theme: 3, type: "anneau", q: "Seriez-vous intéressé(e) par l'intégration de l'outil FILEO ?" },
+    { n: 6, key: "laser", theme: 4, type: "anneau", q: "Seriez-vous favorable à cette évolution : communiquer sur le laser et la cryogénie ?" },
+    { n: 7, key: "nomReseau", theme: 4, type: "anneau", q: "Favorable au nouveau nom : AERONOVA L'INTELLIGENCE DU DÉCAPAGE ?" },
+    { n: 8, key: "prestations", theme: 4, type: "texte", q: "Quelles prestations complémentaires vos clients vous demandent-ils déjà ?" },
+    { n: 9, key: "rencontre", theme: 5, type: "anneau", q: "Seriez-vous intéressé pour participer à une rencontre du réseau en mai 2027 ?" },
+    { n: 10, key: "periodes", theme: 5, type: "multi", q: "Quelles périodes vous conviendraient le mieux ?" },
+    { n: 11, key: "sujets", theme: 5, type: "texte", q: "Quels sujets aimeriez-vous aborder lors de cette rencontre ?" },
+    { n: 12, key: "remarques", theme: 6, type: "texte", q: "Avez-vous d'autres remarques ou suggestions pour améliorer BIO TEAM FRANCE ?" }
+  ],
+  THEMES: {
+    1: "Informations générales",
+    2: "Satisfaction du réseau",
+    3: "FILEO : suivi client",
+    4: "AERONOVA : nouvelles prestations",
+    5: "Rencontre du réseau : mai 2027",
+    6: "Votre avis compte"
+  },
+  STOP: ("les des une pour que qui avec dans sur par pas plus est sont aux ces cette ce cet leur leurs nous vous ils elles mais donc car comme tout tous toute toutes très bien être avoir fait faire peu aussi encore même entre sans sous chez quand alors dont elle lui moi nos vos mes ses son sa ses notre votre plutôt avant après déjà ainsi autres autre etc etre avoir ont été suis sommes serait seraient pourrait faut peut veut ça cela ceci rien quelque quelques chose choses beaucoup trop souvent toujours jamais non oui car puis lors afin selon vers depuis pendant leurs celle celui ceux point points réseau")
+    .split(" ")
+};
+
+QS.pct = function (a, b) { return b ? Math.round((a / b) * 100) : 0; };
+
+QS.count = function (vals, choices) {
+  var c = {}; choices.forEach(function (k) { c[k] = 0; });
+  vals.forEach(function (v) { if (v == null || v === "") return; if (!(v in c)) c[v] = 0; c[v]++; });
+  return c;
+};
+
+QS.keywords = function (texts) {
+  var freq = {};
+  texts.forEach(function (t) {
+    var seen = {};
+    String(t).toLowerCase().replace(/[’']/g, " ").split(/[^a-zàâäçéèêëîïôöùûüÿœæ-]+/).forEach(function (w) {
+      w = w.replace(/^-+|-+$/g, "");
+      if (w.length < 4 || QS.STOP.indexOf(w) >= 0 || seen[w]) return;
+      seen[w] = 1; freq[w] = (freq[w] || 0) + 1;
+    });
+  });
+  return Object.keys(freq).map(function (k) { return { mot: k, n: freq[k] }; })
+    .filter(function (x) { return x.n >= 2; })
+    .sort(function (a, b) { return b.n - a.n || a.mot.localeCompare(b.mot); }).slice(0, 6);
+};
+
+/* records = [{ fields: {...}, createdTime }] tels que renvoyés par Airtable */
+QS.computeStats = function (records) {
+  var F = QS.FIELDS, n = records.length, s = { total: n, q: {} };
+  function col(key) { return records.map(function (r) { return (r.fields || {})[F[key]]; }); }
+
+  var noms = col("nom").filter(Boolean).map(String).sort(function (a, b) { return a.localeCompare(b); });
+  s.q.nom = { noms: noms };
+
+  var notes = col("note").filter(function (v) { return typeof v === "number"; });
+  var dist = []; for (var i = 1; i <= 10; i++) dist.push(notes.filter(function (v) { return v === i; }).length);
+  var moy = notes.length ? notes.reduce(function (a, b) { return a + b; }, 0) / notes.length : 0;
+  var sat = notes.filter(function (v) { return v >= 9; }).length,
+      neu = notes.filter(function (v) { return v >= 7 && v <= 8; }).length,
+      ins = notes.filter(function (v) { return v <= 6; }).length;
+  s.q.note = { nb: notes.length, moyenne: Math.round(moy * 10) / 10, dist: dist,
+    satisfaits: sat, neutres: neu, insatisfaits: ins,
+    pSat: QS.pct(sat, notes.length), pNeu: QS.pct(neu, notes.length), pIns: QS.pct(ins, notes.length) };
+
+  ["fileo", "laser", "nomReseau", "rencontre"].forEach(function (k) {
+    var vals = col(k).filter(Boolean), c = QS.count(vals, QS.CHOICES[k]);
+    s.q[k] = { nb: vals.length, labels: Object.keys(c), values: Object.keys(c).map(function (x) { return c[x]; }),
+      pcts: Object.keys(c).map(function (x) { return QS.pct(c[x], vals.length); }) };
+  });
+
+  var per = col("periodes").filter(function (v) { return Array.isArray(v) && v.length; });
+  var flat = []; per.forEach(function (a) { flat = flat.concat(a); });
+  var cp = QS.count(flat, QS.CHOICES.periodes);
+  s.q.periodes = { nb: per.length, labels: Object.keys(cp), values: Object.keys(cp).map(function (x) { return cp[x]; }),
+    pcts: Object.keys(cp).map(function (x) { return QS.pct(cp[x], per.length); }) };
+
+  ["apprecie", "ameliorer", "prestations", "sujets", "remarques"].forEach(function (k) {
+    var rows = records.map(function (r) { return { nom: (r.fields || {})[F.nom] || "", txt: String((r.fields || {})[F[k]] || "").trim() }; })
+      .filter(function (x) { return x.txt; });
+    s.q[k] = { nb: rows.length, reponses: rows, mots: QS.keywords(rows.map(function (x) { return x.txt; })) };
+  });
+
+  // Indicateurs de synthèse
+  function interet(d) { return QS.pct(d.values[0] + d.values[1], d.nb); }
+  var f = s.q.fileo, l = s.q.laser, nr = s.q.nomReseau, r = s.q.rencontre;
+  s.kpi = {
+    note: s.q.note.moyenne,
+    fileoInteret: interet(f), fileoOui: f.pcts[0],
+    laserInteret: interet(l), laserOui: l.pcts[0],
+    nomOui: nr.pcts[0], nomInteret: interet(nr), nomNon: nr.pcts[2],
+    rencontreOui: r.pcts[0], rencontreInteret: interet(r)
+  };
+  var best = -1, bestLab = "";
+  s.q.periodes.values.forEach(function (v, i) { if (v > best) { best = v; bestLab = s.q.periodes.labels[i]; } });
+  s.kpi.periodeTop = best > 0 ? bestLab : "";
+  return s;
+};
+
+/* ===== Génération du PowerPoint ===== */
+QS.COL = { dark: "1F4D3A", mid: "2F6B4F", leaf: "7FB069", tint: "EAF2E6", amber: "E9A23B", red: "C8553D",
+  ink: "1E2A24", muted: "5E6B63", white: "FFFFFF", grid: "D9E2D6" };
+
+QS.buildDeck = function (PptxGenJS, s, opts) {
+  opts = opts || {};
+  var C = QS.COL, pres = new PptxGenJS();
+  pres.layout = "LAYOUT_16x9"; // 10 x 5.625
+  pres.author = "BIO TEAM FRANCE"; pres.company = "BIO TEAM FRANCE";
+  pres.title = "La Voix des Applicateurs - Résultats";
+  pres.theme = { headFontFace: "Cambria", bodyFontFace: "Calibri" };
+  var dateTxt = opts.date || new Date().toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" });
+
+  pres.defineSlideMaster({ title: "CONTENU", background: { color: C.white },
+    objects: [
+      { text: { text: "BIO TEAM FRANCE  ·  La Voix des Applicateurs", options: { x: 0.5, y: 5.2, w: 6, h: 0.3, fontSize: 10, color: C.muted, fontFace: "Calibri" } } }
+    ],
+    slideNumber: { x: 9.0, y: 5.2, w: 0.5, h: 0.3, fontSize: 10, color: C.muted, align: "right" } });
+  pres.defineSlideMaster({ title: "SOMBRE", background: { color: C.dark } });
+
+  var FONT_CHART = "Calibri";
+  function chartBase(o) {
+    var b = { catAxisLabelColor: C.muted, valAxisLabelColor: C.muted, catAxisLabelFontFace: FONT_CHART,
+      valAxisLabelFontFace: FONT_CHART, dataLabelFontFace: FONT_CHART, legendFontFace: FONT_CHART,
+      catAxisLabelFontSize: 11, valAxisLabelFontSize: 10, dataLabelFontSize: 11,
+      valGridLine: { color: C.grid, size: 0.5 }, catGridLine: { style: "none" }, showLegend: false };
+    for (var k in o) b[k] = o[k]; return b;
+  }
+  function header(slide, num, titre, question) {
+    slide.addText(num ? "Question " + num : "", { x: 0.5, y: 0.3, w: 9, h: 0.3, fontSize: 12, bold: true, color: C.leaf, margin: 0, isTextBox: true });
+    slide.addText(titre, { x: 0.5, y: 0.58, w: 9, h: 0.6, fontSize: 26, bold: true, color: C.dark, fontFace: "Cambria", margin: 0, isTextBox: true, valign: "middle" });
+    if (question) slide.addText(question, { x: 0.5, y: 1.18, w: 9, h: 0.4, fontSize: 13, italic: true, color: C.muted, margin: 0, isTextBox: true, valign: "top" });
+  }
+  function card(slide, x, y, w, h, big, label, color) {
+    slide.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: x, y: y, w: w, h: h, fill: { color: C.tint }, line: { color: C.tint }, rectRadius: 0.12 });
+    slide.addText(big, { x: x, y: y + 0.12, w: w, h: h * 0.52, fontSize: 34, bold: true, color: color || C.dark, align: "center", valign: "middle", fontFace: "Cambria", isTextBox: true, margin: 0 });
+    slide.addText(label, { x: x + 0.1, y: y + h * 0.58, w: w - 0.2, h: h * 0.36, fontSize: 12, color: C.ink, align: "center", valign: "top", isTextBox: true, margin: 0 });
+  }
+  function nbLine(slide, nb) {
+    slide.addText(nb + " réponse" + (nb > 1 ? "s" : "") + " sur " + s.total + " questionnaire" + (s.total > 1 ? "s" : ""),
+      { x: 0.5, y: 4.85, w: 6, h: 0.3, fontSize: 10, color: C.muted, margin: 0, isTextBox: true });
+  }
+  function vide(slide) {
+    slide.addText("Aucune réponse pour cette question.", { x: 0.5, y: 2.5, w: 9, h: 0.6, fontSize: 16, color: C.muted, align: "center", isTextBox: true });
+  }
+  function short(t, max) { t = String(t).replace(/\s+/g, " ").trim(); return t.length > max ? t.slice(0, max - 1).replace(/\s\S*$/, "") + "…" : t; }
+
+  /* --- 1. Titre --- */
+  var sl = pres.addSlide({ masterName: "SOMBRE" });
+  sl.addText("BIO TEAM FRANCE", { x: 0.7, y: 1.0, w: 8.6, h: 0.4, fontSize: 16, bold: true, color: C.leaf, charSpacing: 4, isTextBox: true, margin: 0 });
+  sl.addText("La Voix des Applicateurs", { x: 0.7, y: 1.45, w: 8.6, h: 1.0, fontSize: 44, bold: true, color: C.white, fontFace: "Cambria", isTextBox: true, margin: 0 });
+  sl.addText("Résultats du questionnaire de satisfaction du réseau", { x: 0.7, y: 2.45, w: 8.6, h: 0.5, fontSize: 20, color: "D7E6D0", isTextBox: true, margin: 0 });
+  sl.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: 0.7, y: 3.55, w: 3.2, h: 0.9, fill: { color: C.mid }, line: { color: C.mid }, rectRadius: 0.12 });
+  sl.addText([{ text: String(s.total), options: { fontSize: 30, bold: true, color: C.white, fontFace: "Cambria" } },
+    { text: "  applicateur" + (s.total > 1 ? "s" : "") + " ont répondu", options: { fontSize: 14, color: "D7E6D0" } }],
+    { x: 0.85, y: 3.55, w: 3.0, h: 0.9, valign: "middle", isTextBox: true, margin: 0 });
+  sl.addText(dateTxt, { x: 0.7, y: 4.75, w: 6, h: 0.35, fontSize: 13, color: "B9CDB1", isTextBox: true, margin: 0 });
+
+  /* --- 2. Chiffres clés --- */
+  sl = pres.addSlide({ masterName: "CONTENU" });
+  header(sl, null, "L'essentiel en chiffres", "Synthèse des réponses des applicateurs du réseau");
+  var k = s.kpi, cw = 2.05, gap = 0.27, x0 = 0.5;
+  card(sl, x0, 1.85, cw, 1.6, (s.q.note.nb ? String(k.note).replace(".", ",") : "–") + "/10", "Note moyenne du réseau", C.dark);
+  card(sl, x0 + (cw + gap), 1.85, cw, 1.6, k.fileoInteret + " %", "intéressés par FILEO (oui ou peut-être)", C.mid);
+  card(sl, x0 + 2 * (cw + gap), 1.85, cw, 1.6, k.laserOui + " %", "favorables à la communication laser et cryogénie", C.mid);
+  card(sl, x0 + 3 * (cw + gap), 1.85, cw, 1.6, k.nomOui + " %", "favorables au nom AERONOVA", C.amber);
+  var lignes = [];
+  if (s.q.note.nb) lignes.push(s.q.note.pSat + " % de très satisfaits (note 9-10) et " + s.q.note.pIns + " % d'insatisfaits (note 6 ou moins).");
+  if (s.q.rencontre.nb) lignes.push("Rencontre de mai 2027 : " + k.rencontreInteret + " % partants (oui ou peut-être).");
+  if (k.periodeTop) lignes.push("Période préférée pour la rencontre : " + k.periodeTop + ".");
+  if (lignes.length) sl.addText(lignes.map(function (t, i) { return { text: t, options: { bullet: true, breakLine: i < lignes.length - 1 } }; }),
+    { x: 0.5, y: 3.7, w: 9, h: 1.3, fontSize: 14, color: C.ink, paraSpaceAfter: 6, valign: "top", isTextBox: true });
+
+  /* --- Questions --- */
+  var themeVu = {};
+  QS.QUESTIONS.forEach(function (Q) {
+    if (Q.theme >= 2 && !themeVu[Q.theme]) {
+      themeVu[Q.theme] = 1;
+      var d = pres.addSlide({ masterName: "SOMBRE" });
+      d.addText("Thème " + (Q.theme - 1), { x: 0.7, y: 1.8, w: 8.6, h: 0.4, fontSize: 16, bold: true, color: C.leaf, isTextBox: true, margin: 0 });
+      d.addText(QS.THEMES[Q.theme], { x: 0.7, y: 2.2, w: 8.6, h: 1.0, fontSize: 38, bold: true, color: C.white, fontFace: "Cambria", isTextBox: true, margin: 0 });
+    }
+    var d2 = s.q[Q.key];
+    if (Q.type === "nom") return slideNoms(Q);
+    if (Q.type === "note") return slideNote(Q, d2);
+    if (Q.type === "texte") return slideTexte(Q, d2);
+    if (Q.type === "barres" || Q.type === "multi") return slideBarres(Q, d2);
+    if (Q.type === "anneau") return slideAnneau(Q, d2);
+  });
+
+  function slideNoms(Q) {
+    var sl = pres.addSlide({ masterName: "CONTENU" });
+    header(sl, 1, "Qui a répondu ?", "Adhérents interrogés par téléphone");
+    card(sl, 0.5, 1.85, 2.4, 1.8, String(s.total), opts.cibles ? "adhérents interrogés sur " + opts.cibles + " (" + QS.pct(s.total, opts.cibles) + " %)"
+      : "questionnaire" + (s.total > 1 ? "s" : "") + " reçu" + (s.total > 1 ? "s" : ""), C.dark);
+    var noms = s.q.nom.noms, max = 24, shown = noms.slice(0, max);
+    if (!shown.length) return;
+    var per = Math.ceil(shown.length / 2), cols = [shown.slice(0, per), shown.slice(per)];
+    cols.forEach(function (c, i) {
+      if (!c.length) return;
+      sl.addText(c.map(function (t, j) { return { text: short(t, 34), options: { bullet: true, breakLine: j < c.length - 1 } }; }),
+        { x: 3.3 + i * 3.2, y: 1.85, w: 3.1, h: 3.0, fontSize: shown.length > 16 ? 11 : 13, color: C.ink, valign: "top", isTextBox: true, paraSpaceAfter: 2 });
+    });
+    if (noms.length > max) sl.addText("+ " + (noms.length - max) + " autres répondants", { x: 3.3, y: 4.85, w: 6, h: 0.3, fontSize: 11, italic: true, color: C.muted, isTextBox: true, margin: 0 });
+  }
+
+  function slideNote(Q, d) {
+    var sl = pres.addSlide({ masterName: "CONTENU" });
+    header(sl, 2, "Satisfaction globale", Q.q);
+    if (!d.nb) return vide(sl);
+    card(sl, 0.5, 1.75, 2.6, 1.35, String(d.moyenne).replace(".", ",") + "/10", "note moyenne", C.dark);
+    var rows = [["Très satisfaits (9-10)", d.pSat, C.leaf], ["Plutôt satisfaits (7-8)", d.pNeu, C.amber], ["Insatisfaits (1-6)", d.pIns, C.red]];
+    rows.forEach(function (r, i) {
+      var y = 3.25 + i * 0.5;
+      sl.addShape(pres.shapes.OVAL, { x: 0.55, y: y + 0.1, w: 0.2, h: 0.2, fill: { color: r[2] }, line: { color: r[2] } });
+      sl.addText([{ text: r[1] + " %  ", options: { bold: true, color: C.ink } }, { text: r[0], options: { color: C.muted } }],
+        { x: 0.85, y: y, w: 2.6, h: 0.4, fontSize: 13, valign: "middle", isTextBox: true, margin: 0 });
+    });
+    sl.addChart(pres.charts.BAR, [{ name: "Nombre de réponses", labels: ["1", "2", "3", "4", "5", "6", "7", "8", "9", "10"], values: d.dist }],
+      chartBase({ x: 3.6, y: 1.65, w: 5.9, h: 3.2, barDir: "col", chartColors: [C.mid], showValue: true, dataLabelPosition: "outEnd",
+        dataLabelColor: C.ink, valAxisHidden: true, valGridLine: { style: "none" }, barGapWidthPct: 40,
+        showTitle: true, title: "Répartition des notes (nombre d'applicateurs)", titleFontSize: 12, titleColor: C.muted, titleFontFace: FONT_CHART }));
+    nbLine(sl, d.nb);
+    sl.addNotes("Note moyenne " + d.moyenne + "/10 sur " + d.nb + " réponses. Répartition 1 à 10 : " + d.dist.join(", ") + ".");
+  }
+
+  function slideBarres(Q, d) {
+    var sl = pres.addSlide({ masterName: "CONTENU" });
+    var titres = { suivi: "Le suivi client aujourd'hui", periodes: "Périodes préférées" };
+    header(sl, Q.n, titres[Q.key], Q.q + (Q.type === "multi" ? " (plusieurs choix possibles)" : ""));
+    if (!d.nb) return vide(sl);
+    // tri décroissant pour la lecture
+    var idx = d.labels.map(function (_, i) { return i; });
+    if (Q.type === "barres") idx.sort(function (a, b) { return d.values[b] - d.values[a]; });
+    var labels = idx.map(function (i) { return d.labels[i]; }).reverse(), vals = idx.map(function (i) { return d.pcts[i]; }).reverse();
+    sl.addChart(pres.charts.BAR, [{ name: "% des répondants", labels: labels, values: vals }],
+      chartBase({ x: 0.5, y: 1.65, w: 6.1, h: 3.2, barDir: "bar", chartColors: [Q.type === "multi" ? C.amber : C.mid], showValue: true,
+        dataLabelPosition: "outEnd", dataLabelFormatCode: "0\" %\"", dataLabelColor: C.ink, valAxisHidden: true, valAxisMaxVal: 100,
+        valGridLine: { style: "none" }, barGapWidthPct: 45, catAxisLabelFontSize: 12 }));
+    var top = idx[0], topLab = d.labels[top], topP = d.pcts[top];
+    if (Q.type === "multi") { var m = -1; d.values.forEach(function (v, i) { if (v > m) { m = v; top = i; } }); topLab = d.labels[top]; topP = d.pcts[top]; }
+    card(sl, 6.9, 1.85, 2.6, 1.6, topP + " %", (Q.type === "multi" ? "choisissent " : "") + topLab, C.dark);
+    sl.addText(Q.type === "multi" ? "Un applicateur peut choisir plusieurs périodes : le total dépasse 100 %." : "Pourcentage des applicateurs ayant répondu à cette question.",
+      { x: 6.9, y: 3.65, w: 2.6, h: 0.9, fontSize: 11, color: C.muted, isTextBox: true, margin: 0, valign: "top" });
+    nbLine(sl, d.nb);
+    sl.addNotes(d.labels.map(function (l, i) { return l + " : " + d.values[i] + " (" + d.pcts[i] + " %)"; }).join(" ; "));
+  }
+
+  function slideAnneau(Q, d) {
+    var sl = pres.addSlide({ masterName: "CONTENU" });
+    var titres = { fileo: "Intérêt pour FILEO", laser: "Communication laser et cryogénie", nomReseau: "Nouveau nom : AERONOVA", rencontre: "Participation à la rencontre" };
+    header(sl, Q.n, titres[Q.key], Q.q);
+    if (!d.nb) return vide(sl);
+    sl.addChart(pres.charts.DOUGHNUT, [{ name: titres[Q.key], labels: d.labels, values: d.values }],
+      chartBase({ x: 0.4, y: 1.65, w: 4.6, h: 3.2, holeSize: 55, chartColors: [C.leaf, C.amber, C.red], showPercent: true, showValue: false,
+        dataLabelColor: C.white, dataLabelFontSize: 12, dataLabelFontBold: true, showLegend: true, legendPos: "r", legendFontSize: 11, legendColor: C.ink }));
+    var cols = [C.leaf, C.amber, C.red];
+    d.labels.forEach(function (l, i) {
+      var y = 1.85 + i * 0.95;
+      sl.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: 5.4, y: y, w: 4.1, h: 0.8, fill: { color: C.tint }, line: { color: C.tint }, rectRadius: 0.1 });
+      sl.addText(d.pcts[i] + " %", { x: 5.55, y: y, w: 1.3, h: 0.8, fontSize: 24, bold: true, color: cols[i], fontFace: "Cambria", valign: "middle", isTextBox: true, margin: 0 });
+      sl.addText([{ text: l, options: { bold: true, breakLine: true } }, { text: d.values[i] + " applicateur" + (d.values[i] > 1 ? "s" : ""), options: { color: C.muted, fontSize: 11 } }],
+        { x: 6.85, y: y, w: 2.55, h: 0.8, fontSize: 13, color: C.ink, valign: "middle", isTextBox: true, margin: 0 });
+    });
+    nbLine(sl, d.nb);
+    sl.addNotes(d.labels.map(function (l, i) { return l + " : " + d.values[i] + " (" + d.pcts[i] + " %)"; }).join(" ; "));
+  }
+
+  function slideTexte(Q, d) {
+    var titres = { apprecie: "Ce que les applicateurs apprécient", ameliorer: "Les priorités d'amélioration",
+      prestations: "Prestations déjà demandées par les clients", sujets: "Sujets souhaités pour la rencontre", remarques: "Remarques et suggestions" };
+    var rep = d.reponses, moyLen = rep.length ? rep.reduce(function (a, r) { return a + r.txt.length; }, 0) / rep.length : 0;
+    var court = moyLen < 70, capFull = court ? 6 : 4, cap1 = d.mots.length ? (court ? 5 : 3) : capFull, maxPages = 3;
+    var bornes = [[0, cap1]];
+    while (bornes.length < maxPages && bornes[bornes.length - 1][1] < rep.length) {
+      var deb = bornes[bornes.length - 1][1]; bornes.push([deb, deb + capFull]);
+    }
+    var pages = bornes.length, dernier = bornes[pages - 1][1];
+    for (var p = 0; p < pages; p++) {
+      var sl = pres.addSlide({ masterName: "CONTENU" });
+      header(sl, Q.n, titres[Q.key] + (p ? " (suite)" : ""), Q.q);
+      if (!rep.length) { vide(sl); continue; }
+      var xq = 0.5, wq = 9, parPage = bornes[p][1] - bornes[p][0];
+      if (p === 0 && d.mots.length) {
+        xq = 4.6; wq = 4.9;
+        var mots = d.mots.slice().reverse();
+        sl.addChart(pres.charts.BAR, [{ name: "Réponses citant ce mot", labels: mots.map(function (m) { return m.mot; }), values: mots.map(function (m) { return m.n; }) }],
+          chartBase({ x: 0.4, y: 1.65, w: 3.9, h: 3.15, barDir: "bar", chartColors: [C.leaf], showValue: true, dataLabelPosition: "outEnd",
+            dataLabelColor: C.ink, valAxisHidden: true, valGridLine: { style: "none" }, barGapWidthPct: 40, catAxisLabelFontSize: 12,
+            showTitle: true, title: "Mots qui reviennent le plus", titleFontSize: 12, titleColor: C.muted, titleFontFace: FONT_CHART }));
+      }
+      var chunk = rep.slice(bornes[p][0], bornes[p][1]), h = (3.15 - 0.12 * (parPage - 1)) / parPage;
+      var maxCar = Math.round((wq / 4.9) * (h > 0.9 ? 150 : 75));
+      chunk.forEach(function (r, i) {
+        var y = 1.7 + i * (h + 0.12);
+        sl.addShape(pres.shapes.ROUNDED_RECTANGLE, { x: xq, y: y, w: wq, h: h, fill: { color: C.tint }, line: { color: C.tint }, rectRadius: 0.08 });
+        sl.addText([{ text: "« " + short(r.txt, maxCar) + " »", options: { italic: true, color: C.ink, breakLine: true } },
+          { text: "— " + short(r.nom || "Anonyme", 40), options: { fontSize: 10, color: C.muted } }],
+          { x: xq + 0.15, y: y + 0.05, w: wq - 0.3, h: h - 0.1, fontSize: 12, valign: "middle", isTextBox: true, margin: 0 });
+      });
+      if (p === pages - 1 && rep.length > dernier)
+        sl.addText("+ " + (rep.length - dernier) + " autres réponses à consulter dans Airtable", { x: 6, y: 4.85, w: 3.5, h: 0.3, fontSize: 10, italic: true, color: C.muted, align: "right", isTextBox: true, margin: 0 });
+      nbLine(sl, d.nb);
+      if (p === 0) sl.addNotes("Toutes les réponses :\n" + rep.map(function (r) { return "- " + (r.nom || "Anonyme") + " : " + r.txt; }).join("\n"));
+    }
+  }
+
+  /* --- Conclusion --- */
+  sl = pres.addSlide({ masterName: "SOMBRE" });
+  sl.addText("Ce que nous retenons", { x: 0.7, y: 0.6, w: 8.6, h: 0.8, fontSize: 34, bold: true, color: C.white, fontFace: "Cambria", isTextBox: true, margin: 0 });
+  var concl = [];
+  if (s.q.note.nb) concl.push("Satisfaction : note moyenne de " + String(k.note).replace(".", ",") + "/10, avec " + s.q.note.pSat + " % de très satisfaits.");
+  if (s.q.fileo.nb) concl.push("FILEO : " + k.fileoInteret + " % des applicateurs intéressés, dont " + k.fileoOui + " % tout à fait.");
+  if (s.q.laser.nb) concl.push("Laser et cryogénie : " + k.laserOui + " % tout à fait favorables à cette communication.");
+  if (s.q.nomReseau.nb) concl.push("Nom AERONOVA : " + k.nomOui + " % tout à fait favorables, " + k.nomNon + " % contre.");
+  if (s.q.rencontre.nb) concl.push("Rencontre de mai 2027 : " + k.rencontreOui + " % partants" + (k.periodeTop ? ", période préférée : " + k.periodeTop : "") + ".");
+  if (!concl.length) concl.push("Pas encore de réponses enregistrées.");
+  sl.addText(concl.map(function (t, i) { return { text: t, options: { bullet: true, breakLine: i < concl.length - 1 } }; }),
+    { x: 0.7, y: 1.5, w: 8.6, h: 2.8, fontSize: 15, color: "E3EEDD", paraSpaceAfter: 9, valign: "top", isTextBox: true });
+  sl.addText("Merci à tous les applicateurs pour leur participation !", { x: 0.7, y: 4.45, w: 8.6, h: 0.5, fontSize: 16, bold: true, color: C.leaf, isTextBox: true, margin: 0 });
+
+  return pres;
+};
+
+/* ===== Préparation : relie les réponses aux fiches Applicateurs et calcule le suivi des appels =====
+   applicateurs / reponses = enregistrements bruts de l'API Airtable ({ id, createdTime, fields }) */
+QS.CATS_CIBLES = ["abonne", "decouverte"];
+QS.STATUTS = ["Répondu", "À rappeler", "Injoignable", "Refus"];
+QS.prepare = function (applicateurs, reponses) {
+  var F = QS.FIELDS, byId = {};
+  applicateurs.forEach(function (a) { byId[a.id] = a; });
+  function nomDe(id) { var a = byId[id]; return a ? (a.fields.nom || "Sans nom") : "Adhérent inconnu"; }
+
+  var cibles = applicateurs.filter(function (a) {
+    var f = a.fields || {};
+    return QS.CATS_CIBLES.indexOf(f.cat) >= 0 && !f.interne && !f.depart_reseau;
+  });
+
+  // Appels triés du plus ancien au plus récent : le dernier appel d'un adhérent l'emporte
+  var tri = reponses.slice().sort(function (a, b) { return String(a.createdTime).localeCompare(String(b.createdTime)); });
+  var dernier = {}, repondus = {}, parEnq = {}, parStatut = {};
+  QS.STATUTS.forEach(function (s) { parStatut[s] = 0; });
+  parStatut["Pas encore appelé"] = 0;
+  tri.forEach(function (r) {
+    var f = r.fields || {}, id = (f[F.nom] || [])[0];
+    var statut = f["Statut appel"] || (f[F.note] != null ? "Répondu" : "");
+    if (!id) return;
+    dernier[id] = { statut: statut, enq: f["Enquêteur"] || "", note: f["Note d'appel"] || "", date: r.createdTime };
+    if (statut === "Répondu") repondus[id] = r;
+  });
+  // Un adhérent qui a déjà répondu reste « Répondu » même si une ligne plus récente existe
+  Object.keys(repondus).forEach(function (id) { dernier[id].statut = "Répondu"; });
+
+  var suivi = cibles.map(function (a) {
+    var d = dernier[a.id] || { statut: "", enq: "", note: "", date: "" };
+    return { id: a.id, nom: a.fields.nom || "", tel: a.fields.telephone || "", cat: a.fields.cat, statut: d.statut || "Pas encore appelé",
+      enq: d.enq, note: d.note, date: d.date };
+  });
+  // Adhérents hors cible (ex. ancien adhérent) qui ont tout de même été appelés
+  Object.keys(dernier).forEach(function (id) {
+    if (!cibles.some(function (c) { return c.id === id; }))
+      suivi.push({ id: id, nom: nomDe(id), tel: (byId[id] && byId[id].fields.telephone) || "", cat: byId[id] ? byId[id].fields.cat : "", statut: dernier[id].statut,
+        enq: dernier[id].enq, note: dernier[id].note, date: dernier[id].date, horsCible: true });
+  });
+  var ordre = { "Pas encore appelé": 0, "À rappeler": 1, "Injoignable": 2, "Refus": 3, "Répondu": 4 };
+  suivi.sort(function (a, b) { return (ordre[a.statut] - ordre[b.statut]) || a.nom.localeCompare(b.nom, "fr", { numeric: true }); });
+  suivi.forEach(function (x) { if (x.statut in parStatut) parStatut[x.statut]++; });
+
+  tri.forEach(function (r) {
+    var f = r.fields || {}, statut = f["Statut appel"] || (f[F.note] != null ? "Répondu" : "");
+    if (statut === "Répondu" && f["Enquêteur"]) parEnq[f["Enquêteur"]] = (parEnq[f["Enquêteur"]] || 0) + 1;
+  });
+
+  // Une seule réponse par adhérent (la plus récente) pour les statistiques, avec le nom en clair
+  var records = Object.keys(repondus).map(function (id) {
+    var src = repondus[id].fields, f = {};
+    for (var k in src) f[k] = src[k];
+    f[F.nom] = nomDe(id);
+    return { fields: f, createdTime: repondus[id].createdTime };
+  });
+  return { records: records, suivi: suivi, nbCibles: cibles.length, parStatut: parStatut, parEnq: parEnq,
+    aAppeler: suivi.filter(function (x) { return x.statut !== "Répondu" && x.statut !== "Refus"; }).length };
+};
+
+/* Recompresse le .pptx sans entrées « dossier » (meilleure compatibilité OneDrive / Google Drive) */
+QS.cleanZip = function (JSZip, arrayBuffer, outType) {
+  return JSZip.loadAsync(arrayBuffer).then(function (src) {
+    var out = new JSZip(), jobs = [];
+    src.forEach(function (path, entry) {
+      if (entry.dir) return;
+      jobs.push(entry.async("uint8array").then(function (data) { out.file(path, data, { createFolders: false }); }));
+    });
+    return Promise.all(jobs).then(function () {
+      return out.generateAsync({ type: outType || "blob", compression: "DEFLATE",
+        mimeType: "application/vnd.openxmlformats-officedocument.presentationml.presentation" });
+    });
+  });
+};
+
+if (typeof module !== "undefined") module.exports = QS;
+
+</script>
+<script>
+/* Données de démonstration au format brut Airtable (aussi intégrées dans l'outil) */
+var DEMO = (function () {
+  var noms = ["44 - DECAP OUEST", "85 - AERO SERVICES", "49 - RENOV'SABLE", "35 - SABLAGE PRO", "72 - AERONET", "53 - CLEAN FAÇADE",
+    "29 - GOMMAGE ATLANTIQUE", "56 - BOIS & PIERRE DÉCO", "22 - PIERRE NEUVE", "37 - ATELIER GOMMAGE", "18 - CENTRE DÉCAP",
+    "41 - LOIRE SABLAGE", "86 - POITOU GOMMAGE", "79 - DÉCAP 79", "17 - AERO CHARENTE", "50 - MANCHE RÉNOV"];
+  var applicateurs = noms.map(function (n, i) {
+    return { id: "recDEMO" + String(i).padStart(10, "0"), createdTime: "2026-06-10T09:00:00.000Z",
+      fields: { nom: n, cat: i % 5 === 4 ? "decouverte" : "abonne", telephone: "06 00 00 00 " + String(10 + i) } };
+  });
+  var F = ["Q2 Note réseau", "Q3 Points appréciés", "Q4 Points à améliorer", null, "Q5 Intérêt FILEO", "Q6 Évolution laser cryogénie",
+    "Q8 Prestations demandées", "Q9 Participation rencontre", "Q10 Périodes préférées", "Q11 Sujets rencontre", "Q12 Remarques"];
+  var rep = [
+    [0, "Valentin", 9, "La solidarité entre applicateurs et les leads transmis", "Plus de leads en hiver", "Avec Excel ou un tableur", "Oui, tout à fait", "Oui", "Nettoyage de toiture, hydrofuge", "Oui", ["Mi-mai 2027", "En semaine"], "Les tarifs et les nouvelles techniques", ""],
+    [1, "Arthur", 8, "Le soutien technique et la marque", "La communication interne", "Sur papier ou carnet", "Peut-être, j'aimerais en savoir plus", "Peut-être", "Hydrofuge et traitement anti-mousse", "Peut-être, selon les dates", ["Fin mai 2027", "Le week-end"], "Formation technique sur les buses", "Bravo pour le travail"],
+    [2, "Valentin", 7, "La marque connue et les leads", "Le prix du matériel", "Sans outil particulier", "Oui, tout à fait", "Oui", "Peinture de volets, hydrofuge", "Oui", ["Mi-mai 2027", "En semaine"], "Les tarifs du réseau", ""],
+    [3, "Arthur", 9, "La formation et le soutien", "Les délais de livraison du matériel", "Avec Excel ou un tableur", "Peut-être, j'aimerais en savoir plus", "Oui", "Nettoyage de façade, hydrofuge", "Oui", ["Mi-mai 2027", "Le week-end"], "Nouvelles prestations et tarifs", ""],
+    [4, "Valentin", 8, "La marque et les outils", "La communication sur les campagnes Facebook", "Sans outil particulier", "Oui, tout à fait", "Peut-être", "Décapage de volets", "Peut-être, selon les dates", ["Mi-mai 2027"], "Marketing local", ""],
+    [5, "Arthur", 9, "L'entraide entre applicateurs", "Plus de visibilité sur Google", "Avec Excel ou un tableur", "Oui, tout à fait", "Oui", "Nettoyage de toiture", "Oui", ["Mi-mai 2027", "En semaine"], "Visibilité Google et marketing", ""],
+    [6, "Valentin", 7, "Les formations", "Le prix de l'abonnement", "Sur papier ou carnet", "Non, pas intéressé", "Non", "", "Oui", ["Fin mai 2027", "En semaine"], "Échanges entre applicateurs", ""],
+    [7, "Arthur", 6, "Les leads", "Plus de suivi des leads et de communication", "Sur papier ou carnet", "Oui, tout à fait", "Non", "", "Non", [], "", "Les leads arrivent parfois trop tard"],
+    [8, "Valentin", 5, "Peu de choses pour l'instant", "Plus de leads et un meilleur suivi", "Sans outil particulier", "Peut-être, j'aimerais en savoir plus", "Peut-être", "Hydrofuge", "Non", [], "", "Plus de présence du siège sur le terrain"],
+    [9, "Arthur", 10, "L'entraide et les formations", "", "Avec un logiciel de gestion client", "Non, pas intéressé", "Oui", "Traitement anti-mousse", "Oui", ["Début mai 2027", "En semaine"], "Partage d'expérience chantiers", "Continuez comme ça"]
+  ];
+  var reponses = [], n = 0;
+  function rec(i, enq, statut, note, extra) {
+    var f = { "Q1 Adhérent": [applicateurs[i].id], "Enquêteur": enq, "Statut appel": statut };
+    if (note) f["Note d'appel"] = note;
+    for (var k in extra) f[k] = extra[k];
+    n++; reponses.push({ id: "recREP" + n, createdTime: "2026-11-1" + (n % 9) + "T10:" + String(10 + n) + ":00.000Z", fields: f });
+  }
+  rec(10, "Valentin", "À rappeler", "Rappeler jeudi après 17 h", {});
+  rec(11, "Arthur", "Injoignable", "Messagerie, laissé un message", {});
+  rec(12, "Valentin", "Refus", "Pas le temps en ce moment", {});
+  rep.forEach(function (r) {
+    var x = {}; F.forEach(function (k, j) { var v = r[j + 2]; if (k && v !== "" && !(Array.isArray(v) && !v.length)) x[k] = v; });
+    var map = { "Oui": "Oui, tout à fait", "Peut-être": "Peut-être, j'aimerais en savoir plus", "Non": "Non, pas intéressé" };
+    x["Q6 Évolution laser cryogénie"] = map[x["Q6 Évolution laser cryogénie"]];
+    x["Q7 Nom AERONOVA"] = ["Oui, tout à fait", "Oui, tout à fait", "Peut-être, j'aimerais en savoir plus", "Non, pas intéressé"][r[0] % 4];
+    rec(r[0], r[1], "Répondu", "", x);
+  });
+  return { applicateurs: applicateurs, reponses: reponses };
+})();
+if (typeof module !== "undefined") module.exports = DEMO;
+
+</script>
+<script>
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var etat = { prep: null, stats: null, demo: false, filtre: "aAppeler" };
+  var graphs = [];
+  var CLES = { tok: "btf_tok", base: "btf_base2", table: "btf_table2", lienForm: "btf_form" };
+
+  function lire(k, d) { try { return localStorage.getItem(k) || d; } catch (e) { return d; } }
+  function ecrire(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
+  function msg(t, cls) { var m = $("msg"); m.textContent = t; m.className = cls || ""; }
+  function esc(t) { return String(t == null ? "" : t).replace(/[&<>"]/g, function (c) { return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]; }); }
+
+  $("tok").value = lire(CLES.tok, "");
+  $("base").value = lire(CLES.base, "appaGCOS3oYqU6DQh");
+  $("table").value = lire(CLES.table, "Questionnaire_Reponses");
+  $("lienForm").value = lire(CLES.lienForm, "");
+  if (!$("tok").value) $("cfg").style.display = "block";
+
+  $("btnCfg").onclick = function () { var c = $("cfg"); c.style.display = c.style.display === "none" ? "block" : "none"; };
+  $("btnSave").onclick = function () {
+    ecrire(CLES.tok, $("tok").value.trim()); ecrire(CLES.base, $("base").value.trim());
+    ecrire(CLES.table, $("table").value.trim()); ecrire(CLES.lienForm, $("lienForm").value.trim());
+    $("cfg").style.display = "none"; msg("Réglages enregistrés.", "ok"); charger();
+  };
+  $("btnSaisir").onclick = function () {
+    var l = $("lienForm").value.trim();
+    if (!/^https:\/\//.test(l)) { $("cfg").style.display = "block"; msg("Collez d'abord le lien du questionnaire publié dans les réglages.", "err"); return; }
+    window.open(l, "_blank", "noopener");
+  };
+  $("btnCharger").onclick = function () { charger(); };
+  $("btnDemo").onclick = function () { etat.demo = true; afficher(DEMO.applicateurs, DEMO.reponses); msg("Données de démonstration affichées.", "ok"); };
+
+  /* ===== Lecture Airtable ===== */
+  function lireTable(tok, base, table, champs) {
+    var tout = [];
+    function page(offset) {
+      var url = "https://api.airtable.com/v0/" + encodeURIComponent(base) + "/" + encodeURIComponent(table) + "?pageSize=100" +
+        (champs || []).map(function (c) { return "&fields%5B%5D=" + encodeURIComponent(c); }).join("") +
+        (offset ? "&offset=" + encodeURIComponent(offset) : "");
+      return fetch(url, { headers: { Authorization: "Bearer " + tok } }).then(function (r) {
+        if (!r.ok) return r.json().catch(function () { return {}; }).then(function (j) {
+          var e = (j.error && (j.error.message || j.error.type)) || ("Erreur " + r.status);
+          if (r.status === 401 || r.status === 403) e = "Accès refusé à la table « " + table + " » : vérifiez le jeton et ses droits sur la base.";
+          if (r.status === 404) e = "Table « " + table + " » introuvable : vérifiez l'ID de la base et le nom de la table.";
+          if (r.status === 422) e = "Un champ attendu n'existe pas dans « " + table + " » : " + e;
+          throw new Error(e);
+        });
+        return r.json();
+      }).then(function (j) { tout = tout.concat(j.records || []); return j.offset ? page(j.offset) : tout; });
+    }
+    return page();
+  }
+
+  function charger() {
+    var tok = $("tok").value.trim(), base = $("base").value.trim(), table = $("table").value.trim();
+    if (!tok) { $("cfg").style.display = "block"; msg("Indiquez d'abord votre jeton Airtable dans les réglages.", "err"); return; }
+    msg("Chargement…");
+    Promise.all([
+      lireTable(tok, base, "Applicateurs", ["nom", "cat", "telephone", "interne", "depart_reseau"]),
+      lireTable(tok, base, table)
+    ]).then(function (res) {
+      etat.demo = false; afficher(res[0], res[1]);
+      msg(etat.prep.parStatut["Répondu"] + " adhérent(s) interrogé(s) sur " + etat.prep.nbCibles + ".", "ok");
+    }).catch(function (e) { msg(e.message, "err"); });
+  }
+
+  /* ===== PowerPoint ===== */
+  $("btnPpt").onclick = function () {
+    if (!etat.stats) return;
+    if (!etat.stats.total && !confirm("Aucune réponse pour l'instant. Générer quand même le PowerPoint ?")) return;
+    var b = $("btnPpt"); b.disabled = true; msg("Création du PowerPoint…");
+    try {
+      var pres = QS.buildDeck(PptxGenJS, etat.stats, { cibles: etat.prep.nbCibles });
+      pres.write({ outputType: "arraybuffer" })
+        .then(function (ab) { return QS.cleanZip(JSZip, ab, "blob"); })
+        .then(function (blob) {
+          var d = new Date(), nom = "Resultats_questionnaire_reseau_" + d.getFullYear() + "-" + String(d.getMonth() + 1).padStart(2, "0") + "-" + String(d.getDate()).padStart(2, "0") + (etat.demo ? "_DEMO" : "") + ".pptx";
+          var a = document.createElement("a"); a.href = URL.createObjectURL(blob); a.download = nom;
+          document.body.appendChild(a); a.click(); setTimeout(function () { URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+          msg("PowerPoint téléchargé : " + nom, "ok");
+        })
+        .catch(function (e) { msg("Erreur PowerPoint : " + e.message, "err"); })
+        .then(function () { b.disabled = false; });
+    } catch (e) { msg("Erreur PowerPoint : " + e.message, "err"); b.disabled = false; }
+  };
+
+  /* ===== Affichage ===== */
+  var ST_CLASSE = { "Pas encore appelé": 0, "À rappeler": 1, "Injoignable": 2, "Refus": 3, "Répondu": 4 };
+  var ST_COUL = { "Répondu": "#7FB069", "À rappeler": "#E9A23B", "Injoignable": "#D9824B", "Refus": "#C8553D", "Pas encore appelé": "#C9D3CF" };
+
+  function afficher(applicateurs, reponses) {
+    etat.prep = QS.prepare(applicateurs, reponses);
+    etat.stats = QS.computeStats(etat.prep.records);
+    $("demoBandeau").style.display = etat.demo ? "block" : "none";
+    $("btnPpt").disabled = false;
+    graphs.forEach(function (g) { g.destroy(); }); graphs = [];
+    var s = etat.stats, k = s.kpi, p = etat.prep, h = "";
+
+    /* --- Suivi des appels --- */
+    var total = p.nbCibles || 1;
+    h += '<div class="theme"><small>Enquête téléphonique</small><h2>Suivi des appels</h2></div>';
+    h += '<div class="carte"><div><b style="font-size:22px">' + p.parStatut["Répondu"] + "</b> adhérent" + (p.parStatut["Répondu"] > 1 ? "s" : "") +
+      " interrogé" + (p.parStatut["Répondu"] > 1 ? "s" : "") + " sur <b>" + p.nbCibles + "</b> (" + QS.pct(p.parStatut["Répondu"], p.nbCibles) + " %)</div>";
+    h += '<div class="progres">' + ["Répondu", "À rappeler", "Injoignable", "Refus"].map(function (st) {
+      return '<i style="width:' + (p.parStatut[st] / total * 100) + "%;background:" + ST_COUL[st] + '" title="' + st + '"></i>';
+    }).join("") + "</div>";
+    h += '<div class="legende">' + ["Répondu", "À rappeler", "Injoignable", "Refus", "Pas encore appelé"].map(function (st) {
+      return '<span><span class="pastille" style="background:' + ST_COUL[st] + '"></span>' + st + " : <b>" + p.parStatut[st] + "</b></span>";
+    }).join("") + "</div>";
+    var enq = Object.keys(p.parEnq);
+    if (enq.length) h += '<div class="legende" style="margin-top:8px">Questionnaires complétés par : ' + enq.map(function (e) { return "<span><b>" + esc(e) + "</b> " + p.parEnq[e] + "</span>"; }).join("") + "</div>";
+    h += '<div class="filtres">' +
+      bouton("aAppeler", "À appeler (" + p.aAppeler + ")") + bouton("Répondu", "Interrogés (" + p.parStatut["Répondu"] + ")") +
+      bouton("Refus", "Refus (" + p.parStatut["Refus"] + ")") + bouton("tous", "Tous (" + p.suivi.length + ")") + "</div>";
+    h += '<div id="listeAppels"></div></div>';
+
+    /* --- Résultats --- */
+    h += '<div class="theme"><small>Résultats</small><h2>L\'essentiel en chiffres</h2></div>';
+    h += '<div class="kpis">' +
+      kpi(s.total, "questionnaires complétés") +
+      kpi(s.q.note.nb ? String(k.note).replace(".", ",") + "/10" : "–", "note moyenne du réseau") +
+      kpi(k.fileoInteret + " %", "intéressés par FILEO") +
+      kpi(k.laserOui + " %", "favorables laser / cryogénie") +
+      kpi(k.nomOui + " %", "favorables au nom AERONOVA") +
+      kpi(k.rencontreInteret + " %", "partants pour mai 2027") + "</div>";
+    var parTheme = {};
+    QS.QUESTIONS.forEach(function (Q) { (parTheme[Q.theme] = parTheme[Q.theme] || []).push(Q); });
+    Object.keys(parTheme).forEach(function (t) {
+      h += '<div class="theme"><small>' + (t > 1 ? "Thème " + (t - 1) : "Participation") + '</small><h2>' + esc(t > 1 ? QS.THEMES[t] : "Adhérents interrogés") + '</h2></div><div class="cartes">';
+      parTheme[t].forEach(function (Q) { h += carte(Q); });
+      h += "</div>";
+    });
+    $("resultats").innerHTML = h;
+    Array.prototype.forEach.call(document.querySelectorAll(".filtres button"), function (b) {
+      b.onclick = function () { etat.filtre = b.getAttribute("data-f"); listeAppels(); };
+    });
+    listeAppels();
+    QS.QUESTIONS.forEach(dessiner);
+  }
+  function bouton(f, t) { return '<button data-f="' + f + '"' + (etat.filtre === f ? ' class="actif"' : "") + ">" + esc(t) + "</button>"; }
+
+  function listeAppels() {
+    var p = etat.prep, rows = p.suivi.filter(function (x) {
+      if (etat.filtre === "tous") return true;
+      if (etat.filtre === "aAppeler") return x.statut !== "Répondu" && x.statut !== "Refus";
+      return x.statut === etat.filtre;
+    });
+    Array.prototype.forEach.call(document.querySelectorAll(".filtres button"), function (b) { b.className = b.getAttribute("data-f") === etat.filtre ? "actif" : ""; });
+    if (!rows.length) { $("listeAppels").innerHTML = '<p class="petit">Personne dans cette liste.</p>'; return; }
+    $("listeAppels").innerHTML = '<table class="liste"><thead><tr><th>Adhérent</th><th>Téléphone</th><th>Statut</th><th>Dernier appel</th></tr></thead><tbody>' +
+      rows.map(function (x) {
+        var tel = String(x.tel || "").trim(), lienTel = tel ? '<a href="tel:' + esc(tel.replace(/[^\d+]/g, "")) + '">' + esc(tel) + "</a>" : '<span class="petit">non renseigné</span>';
+        var der = x.date ? new Date(x.date).toLocaleDateString("fr-FR", { day: "numeric", month: "short" }) + (x.enq ? " · " + esc(x.enq) : "") : "";
+        return "<tr><td><b>" + esc(x.nom) + "</b>" + (x.cat === "decouverte" ? ' <span class="petit">(découverte)</span>' : "") +
+          (x.horsCible ? ' <span class="petit">(hors liste)</span>' : "") + "</td><td>" + lienTel + "</td>" +
+          '<td><span class="badge st-' + ST_CLASSE[x.statut] + '">' + esc(x.statut) + "</span></td>" +
+          "<td>" + der + (x.note ? '<div class="petit">' + esc(x.note) + "</div>" : "") + "</td></tr>";
+      }).join("") + "</tbody></table>";
+  }
+
+  function kpi(v, l) { return '<div class="kpi"><b>' + esc(v) + '</b><span>' + esc(l) + '</span></div>'; }
+  function nb(d) { return '<div class="nb">' + d + " réponse" + (d > 1 ? "s" : "") + " sur " + etat.stats.total + " questionnaire" + (etat.stats.total > 1 ? "s" : "") + "</div>"; }
+
+  function carte(Q) {
+    var d = etat.stats.q[Q.key], h = '<div class="carte"><div class="num">Question ' + Q.n + '</div><h3>' + esc(Q.type === "nom" ? "Adhérents ayant répondu au questionnaire" : Q.q) + '</h3>';
+    if (Q.type === "nom") {
+      h += d.noms.length ? '<ol class="noms">' + d.noms.map(function (n) { return "<li>" + esc(n) + "</li>"; }).join("") + "</ol>" : "<p>Aucune réponse pour l'instant.</p>";
+    } else if (Q.type === "texte") {
+      if (d.mots.length) h += '<div class="mots">' + d.mots.map(function (m) { return "<span>" + esc(m.mot) + " · " + m.n + "</span>"; }).join("") + "</div>";
+      h += d.reponses.length ? '<ul class="verb">' + d.reponses.map(function (r) { return "<li><i>« " + esc(r.txt) + " »</i><small>— " + esc(r.nom || "Anonyme") + "</small></li>"; }).join("") + "</ul>" : "<p>Aucune réponse.</p>";
+      h += nb(d.nb);
+    } else {
+      h += '<div class="graph"><canvas id="g' + Q.n + '"></canvas></div>' + nb(d.nb);
+      if (Q.type === "note" && d.nb) h += '<div class="nb"><b>' + String(d.moyenne).replace(".", ",") + '/10</b> de moyenne · ' + d.pSat + ' % très satisfaits (9-10) · ' + d.pNeu + ' % plutôt satisfaits (7-8) · ' + d.pIns + ' % insatisfaits (1-6)</div>';
+      if (Q.type === "multi") h += '<div class="nb">Plusieurs choix possibles : le total dépasse 100 %.</div>';
+    }
+    return h + "</div>";
+  }
+
+  function dessiner(Q) {
+    var el = document.getElementById("g" + Q.n); if (!el || typeof Chart === "undefined") return;
+    var d = etat.stats.q[Q.key], C = QS.COL, cfg;
+    var base = { responsive: true, maintainAspectRatio: false, plugins: { legend: { display: false } } };
+    if (Q.type === "note") {
+      cfg = { type: "bar", data: { labels: ["1","2","3","4","5","6","7","8","9","10"], datasets: [{ data: d.dist,
+        backgroundColor: d.dist.map(function (_, i) { return i >= 8 ? "#" + C.leaf : i >= 6 ? "#" + C.amber : "#" + C.red; }), borderRadius: 4 }] },
+        options: Object.assign({}, base, { scales: { y: { beginAtZero: true, ticks: { precision: 0 } }, x: { grid: { display: false } } } }) };
+    } else if (Q.type === "anneau") {
+      cfg = { type: "doughnut", data: { labels: d.labels.map(function (l, i) { return l + " (" + d.pcts[i] + " %)"; }),
+        datasets: [{ data: d.values, backgroundColor: ["#" + C.leaf, "#" + C.amber, "#" + C.red], borderWidth: 2, borderColor: "#fff" }] },
+        options: Object.assign({}, base, { cutout: "58%", plugins: { legend: { display: true, position: "bottom", labels: { boxWidth: 12 } } } }) };
+    } else {
+      cfg = { type: "bar", data: { labels: d.labels, datasets: [{ data: d.pcts, backgroundColor: "#" + (Q.type === "multi" ? C.amber : C.mid), borderRadius: 4 }] },
+        options: Object.assign({}, base, { indexAxis: "y", scales: { x: { beginAtZero: true, max: 100, ticks: { callback: function (v) { return v + " %"; } } }, y: { grid: { display: false } } },
+          plugins: { legend: { display: false }, tooltip: { callbacks: { label: function (c) { return c.raw + " % (" + d.values[c.dataIndex] + ")"; } } } } }) };
+    }
+    graphs.push(new Chart(el, cfg));
+  }
+
+  if ($("tok").value) charger();
+})();
+
+</script>
+</body>
+</html>
