@@ -133,7 +133,7 @@ const CA_F = {
   montant: "montant"          // nombre
 };
 
-const CRENEAUX = ["Tôt le matin","Début de matinée","Fin de matinée","Début d'après-midi","Fin d'après-midi","Début de soirée"];
+const CRENEAUX = ["Tôt le matin","Début de matinée","Fin de matinée","Début d'après-midi","Milieu d'après-midi","Fin d'après-midi","Début de soirée"];
 
 /* ============================================================ */
 
@@ -164,7 +164,7 @@ async function atUpdate(table, recordId, fields){
   const res = await fetch(atUrl(table, "/"+recordId), {
     method: "PATCH",
     headers,
-    body: JSON.stringify({ fields })
+    body: JSON.stringify({ fields, typecast: true })
   });
   if(!res.ok){ console.error("Update failed", await res.text()); return null; }
   return res.json();
@@ -174,7 +174,7 @@ async function atCreate(table, fields){
   const res = await fetch(atUrl(table), {
     method: "POST",
     headers,
-    body: JSON.stringify({ fields })
+    body: JSON.stringify({ fields, typecast: true })
   });
   if(!res.ok){ console.error("Create failed", await res.text()); return null; }
   return res.json();

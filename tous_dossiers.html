@@ -159,6 +159,7 @@
       <button class="filter-btn" data-creneau="Début de matinée">🌅 Déb. matinée</button>
       <button class="filter-btn" data-creneau="Fin de matinée">🌤️ Fin matinée</button>
       <button class="filter-btn" data-creneau="Début d'après-midi">☀️ Déb. après-midi</button>
+      <button class="filter-btn" data-creneau="Milieu d'après-midi">🕒 Mi-après-midi</button>
       <button class="filter-btn" data-creneau="Fin d'après-midi">🌇 Fin après-midi</button>
       <button class="filter-btn" data-creneau="Début de soirée">🌙 Déb. soirée</button>
       <button class="filter-btn" data-creneau="sans">❔ Sans créneau</button>
@@ -296,12 +297,13 @@ const SOURCE_URLS = {
   fiches: "https://aerogomm.github.io/crmcommerciaux/mes_fiches.html"
 };
 
-const CRENEAUX = ["Tôt le matin","Début de matinée","Fin de matinée","Début d'après-midi","Fin d'après-midi","Début de soirée"];
+const CRENEAUX = ["Tôt le matin","Début de matinée","Fin de matinée","Début d'après-midi","Milieu d'après-midi","Fin d'après-midi","Début de soirée"];
 const CRENEAU_STYLE = {
   "Tôt le matin":          { icon:"🌄", color:"#3b5f8a" },
   "Début de matinée":     { icon:"🌅", color:"#2f6fed" },
   "Fin de matinée":       { icon:"🌤️", color:"#1aa06d" },
   "Début d'après-midi":   { icon:"☀️", color:"#e08a1e" },
+  "Milieu d'après-midi":  { icon:"🕒", color:"#d46a3a" },
   "Fin d'après-midi":     { icon:"🌇", color:"#c14f8f" },
   "Début de soirée":      { icon:"🌙", color:"#6b3fa0" }
 };
@@ -415,7 +417,7 @@ async function atUpdate(cfg, recordId, fields){
   const res = await fetch(atUrl(cfg, "/"+recordId), {
     method: "PATCH",
     headers: { "Authorization": "Bearer " + cfg.token, "Content-Type": "application/json" },
-    body: JSON.stringify({ fields })
+    body: JSON.stringify({ fields, typecast: true })
   });
   if(!res.ok){ console.error("Update failed", await res.text()); return null; }
   return res.json();

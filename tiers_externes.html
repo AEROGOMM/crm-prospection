@@ -197,6 +197,7 @@
           <option>Début de matinée</option>
           <option>Fin de matinée</option>
           <option>Début d'après-midi</option>
+          <option>Milieu d'après-midi</option>
           <option>Fin d'après-midi</option>
           <option>Début de soirée</option>
         </select>
@@ -243,7 +244,7 @@
 
 <script>
 const $ = id => document.getElementById(id);
-const CRENEAUX_ORDER = ["Tôt le matin","Début de matinée","Fin de matinée","Début d'après-midi","Fin d'après-midi","Début de soirée","Sans créneau"];
+const CRENEAUX_ORDER = ["Tôt le matin","Début de matinée","Fin de matinée","Début d'après-midi","Milieu d'après-midi","Fin d'après-midi","Début de soirée","Sans créneau"];
 const CAT_CLASS = {Assurance:"b-assurance", URSSAF:"b-urssaf", TVA:"b-tva", Fournisseur:"b-fournisseur", Autre:"b-autre"};
 const DEFAULT_CATEGORIES = ["Assurance","URSSAF","TVA","Fournisseur","Autre"];
 
@@ -298,7 +299,7 @@ async function fetchRecords(){
 
 async function createRecord(fields){
   const url = `https://api.airtable.com/v0/${CFG.baseId}/${encodeURIComponent(CFG.table)}`;
-  const res = await fetch(url,{method:"POST",headers:{Authorization:`Bearer ${CFG.token}`,"Content-Type":"application/json"},body:JSON.stringify({fields})});
+  const res = await fetch(url,{method:"POST",headers:{Authorization:`Bearer ${CFG.token}`,"Content-Type":"application/json"},body:JSON.stringify({fields,typecast:true})});
   if(!res.ok){ toast("Erreur de création"); throw new Error("create failed"); }
   const data = await res.json();
   RECORDS.push(data);
@@ -307,7 +308,7 @@ async function createRecord(fields){
 
 async function updateRecord(id, fields){
   const url = `https://api.airtable.com/v0/${CFG.baseId}/${encodeURIComponent(CFG.table)}/${id}`;
-  const res = await fetch(url,{method:"PATCH",headers:{Authorization:`Bearer ${CFG.token}`,"Content-Type":"application/json"},body:JSON.stringify({fields})});
+  const res = await fetch(url,{method:"PATCH",headers:{Authorization:`Bearer ${CFG.token}`,"Content-Type":"application/json"},body:JSON.stringify({fields,typecast:true})});
   if(!res.ok){ toast("Erreur d'enregistrement"); throw new Error("update failed"); }
   const data = await res.json();
   const idx = RECORDS.findIndex(r=>r.id===id);
